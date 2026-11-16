@@ -1,0 +1,194 @@
+<?php
+
+declare(strict_types=1);
+
+namespace EvoMark\InertiaSymfonyBundle\Traits;
+
+trait MergesProps
+{
+    /**
+     * Indicates if the property should be merged.
+     */
+    protected bool $merge = false;
+
+    /**
+     * Indicates if the property should be deep merged.
+     */
+    protected bool $deepMerge = false;
+
+    /**
+     * The properties to match on for merging.
+     *
+     * @var array<int, string>
+     */
+    protected array $matchOn = [];
+
+    /**
+     * Indicates if the property values should be appended or prepended.
+     */
+    protected bool $append = true;
+
+    /**
+     * The paths to append.
+     *
+     * @var array<int, string>
+     */
+    protected array $appendsAtPaths = [];
+
+    /**
+     * The paths to prepend.
+     *
+     * @var array<int, string>
+     */
+    protected array $prependsAtPaths = [];
+
+    /**
+     * Mark the property for merging.
+     */
+    public function merge(): static
+    {
+        $this->merge = true;
+
+        return $this;
+    }
+
+    /**
+     * Mark the property for deep merging.
+     */
+    public function deepMerge(): static
+    {
+        $this->deepMerge = true;
+
+        return $this->merge();
+    }
+
+    /**
+     * Set the properties to match on for merging.
+     *
+     * @param string|array<int, string> $matchOn
+     */
+    public function matchOn(string|array $matchOn): static
+    {
+        $this->matchOn = (array) $matchOn;
+
+        return $this;
+    }
+
+    /**
+     * Determine if the property should be merged.
+     */
+    public function shouldMerge(): bool
+    {
+        return $this->merge;
+    }
+
+    /**
+     * Determine if the property should be deep merged.
+     */
+    public function shouldDeepMerge(): bool
+    {
+        return $this->deepMerge;
+    }
+
+    /**
+     * Get the properties to match on for merging.
+     *
+     * @return array<int, string>
+     */
+    public function matchesOn(): array
+    {
+        return $this->matchOn;
+    }
+
+    /**
+     * Determine if the property should be appended at the root level.
+     */
+    public function appendsAtRoot(): bool
+    {
+        return $this->append && $this->mergesAtRoot();
+    }
+
+    /**
+     * Determine if the property should be prepended at the root level.
+     */
+    public function prependsAtRoot(): bool
+    {
+        return !$this->append && $this->mergesAtRoot();
+    }
+
+    /**
+     * Determine if the property merges at the root level.
+     */
+    protected function mergesAtRoot(): bool
+    {
+        return 0 === \count($this->appendsAtPaths) && 0 === \count($this->prependsAtPaths);
+    }
+
+    /**
+     * Specify that the value should be appended, optionally providing a key to append and a property to match on.
+     *
+     * @param bool|string|array<array-key, string> $path
+     */
+    public function append(bool|string|array $path = true, ?string $matchOn = null): static
+    {
+        if (\is_bool($path)) {
+            $this->append = $path;
+        } elseif (\is_string($path)) {
+            $this->appendsAtPaths[] = $path;
+
+            if ($matchOn) {
+                $this->matchOn([...$this->matchOn, "{$path}.{$matchOn}"]);
+            }
+        } else {
+            foreach ($path as $key => $value) {
+                is_numeric($key) ? $this->append($value) : $this->append($key, $value);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Specify that the value should be prepended, optionally providing a key to prepend and a property to match on.
+     *
+     * @param bool|string|array<array-key, string> $path
+     */
+    public function prepend(bool|string|array $path = true, ?string $matchOn = null): static
+    {
+        if (\is_bool($path)) {
+            $this->append = !$path;
+        } elseif (\is_string($path)) {
+            $this->prependsAtPaths[] = $path;
+
+            if ($matchOn) {
+                $this->matchOn([...$this->matchOn, "{$path}.{$matchOn}"]);
+            }
+        } else {
+            foreach ($path as $key => $value) {
+                is_numeric($key) ? $this->prepend($value) : $this->prepend($key, $value);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get the paths to append.
+     *
+     * @return array<int, string>
+     */
+    public function appendsAtPaths(): array
+    {
+        return $this->appendsAtPaths;
+    }
+
+    /**
+     * Get the paths to prepend.
+     *
+     * @return array<int, string>
+     */
+    public function prependsAtPaths(): array
+    {
+        return $this->prependsAtPaths;
+    }
+}

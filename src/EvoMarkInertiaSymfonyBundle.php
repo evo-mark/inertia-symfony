@@ -1,0 +1,129 @@
+<?php
+
+namespace EvoMark\InertiaSymfonyBundle;
+
+use EvoMark\InertiaSymfonyBundle\Config\InertiaConfig;
+use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
+
+class EvoMarkInertiaSymfonyBundle extends AbstractBundle
+{
+    protected string $extensionAlias = 'inertia_symfony';
+
+    public function configure(DefinitionConfigurator $definition): void
+    {
+        $definition->rootNode()
+            ->children()
+                ->scalarNode('root_view')->defaultValue('app.html.twig')->end()
+                // Asset version sent to clients; null disables version checking
+                ->scalarNode('version')->defaultNull()->end()
+                ->arrayNode('ssr')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->booleanNode('enabled')->defaultFalse()->end()
+                        ->stringNode('runtime')->defaultValue('node')->end()
+                        ->booleanNode('ensure_runtime_exists')->defaultFalse()->end()
+                        ->stringNode('url')->defaultValue('http://127.0.0.1:13714')->end()
+                        ->stringNode('hot_url')->defaultNull()->end()
+                        ->integerNode('timeout')->defaultNull()->end()
+                        ->booleanNode('ensure_bundle_exists')->defaultTrue()->end()
+                        ->scalarNode('bundle')->defaultNull()->end()
+                        ->booleanNode('throw_on_error')->defaultFalse()->end()
+                    ->end()
+                ->end()
+                ->arrayNode('pages')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->booleanNode('ensure_pages_exist')->defaultFalse()->end()
+                        ->arrayNode('paths')
+                            ->scalarPrototype()->end()
+                            ->defaultValue(['%kernel.project_dir%/assets/js/pages'])
+                        ->end()
+                        ->arrayNode('extensions')
+                            ->scalarPrototype()->end()
+                            ->defaultValue(['js', 'jsx', 'svelte', 'ts', 'tsx', 'vue'])
+                        ->end()
+                    ->end()
+                ->end()
+                ->arrayNode('testing')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->booleanNode('ensure_pages_exist')->defaultTrue()->end()
+                    ->end()
+                ->end()
+                ->booleanNode('expose_shared_prop_keys')->defaultTrue()->end()
+                ->booleanNode('store_previous_url')->defaultFalse()->end()
+                ->arrayNode('history')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->booleanNode('encrypt')->defaultFalse()->end()
+                    ->end()
+                ->end()
+                ->arrayNode('devtools')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        // null means "only enabled in the dev environment"
+                        ->booleanNode('enabled')->defaultNull()->end()
+                        ->arrayNode('except')
+                            ->scalarPrototype()->end()
+                            ->defaultValue(['_profiler*', '_wdt*', '_inertia/devtools*'])
+                        ->end()
+                        ->arrayNode('storage')
+                            ->addDefaultsIfNotSet()
+                            ->children()
+                                ->scalarNode('path')->defaultValue('%kernel.project_dir%/var/inertia-devtools')->end()
+                                ->integerNode('ttl')->defaultValue(24)->end()
+                                ->integerNode('prune_interval')->defaultValue(300)->end()
+                                ->integerNode('limit')->defaultValue(100)->end()
+                            ->end()
+                        ->end()
+                        // Security attribute / voter checked before serving devtools data
+                        ->scalarNode('gate')->defaultNull()->end()
+                        ->arrayNode('redact')
+                            ->addDefaultsIfNotSet()
+                            ->children()
+                                ->arrayNode('keys')
+                                    ->scalarPrototype()->end()
+                                    ->defaultValue([
+                                        'password',
+                                        'password_confirmation',
+                                        'current_password',
+                                        'token',
+                                        '_token',
+                                        'access_token',
+                                        'refresh_token',
+                                        'secret',
+                                        'client_secret',
+                                        'api_key',
+                                    ])
+                                ->end()
+                                ->arrayNode('headers')
+                                    ->scalarPrototype()->end()
+                                    ->defaultValue([
+                                        'cookie',
+                                        'set-cookie',
+                                        'authorization',
+                                        'proxy-authorization',
+                                        'x-xsrf-token',
+                                        'x-csrf-token',
+                                    ])
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
+                ->booleanNode('preserve_big_integers')->defaultFalse()->end()
+            ->end();
+    }
+
+    /**
+     * @param array<string, mixed> $config
+     */
+    public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
+    {
+        $container->services()->set(InertiaConfig::class)->args([$config]);
+        $container->import('../config/services.php');
+    }
+}
