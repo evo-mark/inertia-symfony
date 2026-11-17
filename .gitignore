@@ -1,0 +1,15 @@
+
+# PHP CS Fixer configuration
+/.php-cs-fixer.cache
+/.php-cs-fixer.php
+
+# PHPUnit
+/.phpunit.cache
+/phpunit.xml
+
+vendor
+composer.lock
+# Docs
+node_modules
+docs/.vitepress/cache
+docs/.vitepress/dist

@@ -1,0 +1,1 @@
+import{U as e,W as t,nt as n,t as r}from"./chunks/framework.CWvfYWS8.js";var i=JSON.parse(`{"title":"Props","description":"","frontmatter":{},"headers":[],"relativePath":"guide/props.md","filePath":"guide/props.md"}`),a={name:`guide/props.md`};function o(r,i,a,o,s,c){return n(),e(`div`,null,[...i[0]||=[t("",40)]])}var s=r(a,[[`render`,o]]);export{i as __pageData,s as default};
