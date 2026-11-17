@@ -39,10 +39,8 @@ trait DefersProps
 
     /**
      * Get the defer group for this property.
-     *
-     * @return string
      */
-    public function group()
+    public function group(): string
     {
         return $this->deferGroup ?? 'default';
     }

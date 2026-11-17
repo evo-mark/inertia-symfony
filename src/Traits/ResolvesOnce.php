@@ -11,8 +11,63 @@ trait ResolvesOnce
     protected ?int $ttl = null;
     protected ?string $key = null;
 
-    // once(), shouldResolveOnce(), shouldBeRefreshed(), getKey(),
-    // as() and fresh() are copied verbatim from the Laravel trait.
+    /**
+     * Mark this prop to be resolved once and remembered by the client,
+     * optionally under a custom key and with an expiry.
+     */
+    public function once(bool $value = true, ?string $as = null, \DateTimeInterface|\DateInterval|int|null $until = null): static
+    {
+        $this->once = $value;
+
+        if (null !== $as) {
+            $this->as($as);
+        }
+
+        if (null !== $until) {
+            $this->until($until);
+        }
+
+        return $this;
+    }
+
+    public function shouldResolveOnce(): bool
+    {
+        return $this->once;
+    }
+
+    public function shouldBeRefreshed(): bool
+    {
+        return $this->refresh;
+    }
+
+    public function getKey(): ?string
+    {
+        return $this->key;
+    }
+
+    /**
+     * Remember the prop under a custom key, so it can be shared across pages.
+     */
+    public function as(\BackedEnum|\UnitEnum|string $key): static
+    {
+        $this->key = match (true) {
+            $key instanceof \BackedEnum => (string) $key->value,
+            $key instanceof \UnitEnum => $key->name,
+            default => $key,
+        };
+
+        return $this;
+    }
+
+    /**
+     * Force the prop to be resolved again, even if the client already has it.
+     */
+    public function fresh(bool $value = true): static
+    {
+        $this->refresh = $value;
+
+        return $this;
+    }
 
     public function until(\DateTimeInterface|\DateInterval|int $delay): static
     {

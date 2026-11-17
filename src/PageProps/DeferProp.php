@@ -4,12 +4,17 @@ declare(strict_types=1);
 
 namespace EvoMark\InertiaSymfonyBundle\PageProps;
 
+use EvoMark\InertiaSymfonyBundle\Interfaces\DeferrableInterface;
+use EvoMark\InertiaSymfonyBundle\Interfaces\IgnoreFirstLoadInterface;
+use EvoMark\InertiaSymfonyBundle\Interfaces\MergeableInterface;
+use EvoMark\InertiaSymfonyBundle\Interfaces\OnceableInterface;
+use EvoMark\InertiaSymfonyBundle\Interfaces\RescuableInterface;
 use EvoMark\InertiaSymfonyBundle\Traits\DefersProps;
 use EvoMark\InertiaSymfonyBundle\Traits\MergesProps;
 use EvoMark\InertiaSymfonyBundle\Traits\ResolvesCallables;
 use EvoMark\InertiaSymfonyBundle\Traits\ResolvesOnce;
 
-class DeferProp
+class DeferProp implements DeferrableInterface, IgnoreFirstLoadInterface, MergeableInterface, OnceableInterface, RescuableInterface
 {
     use DefersProps;
     use MergesProps;
@@ -28,8 +33,6 @@ class DeferProp
 
     /**
      * Resolve the property value.
-     *
-     * @return mixed
      */
     public function __invoke()
     {

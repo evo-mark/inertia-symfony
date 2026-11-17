@@ -21,11 +21,21 @@ final readonly class InertiaConfig
     }
 
     /**
-     * The current asset version, or null to disable version checking.
+     * The configured asset version, or null to derive it from asset_url or the manifest.
      */
     public function getVersion(): ?string
     {
         return $this->config['version'];
+    }
+
+    public function getAssetUrl(): ?string
+    {
+        return $this->config['asset_url'];
+    }
+
+    public function getManifestPath(): string
+    {
+        return $this->config['manifest_path'];
     }
 
     public function isSsr(): bool
@@ -41,6 +51,47 @@ final readonly class InertiaConfig
     public function getSsrTimeout(): ?int
     {
         return $this->config['ssr']['timeout'];
+    }
+
+    public function shouldEnsurePagesExist(): bool
+    {
+        return $this->config['pages']['ensure_pages_exist'];
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getPagePaths(): array
+    {
+        return $this->config['pages']['paths'];
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function getPageExtensions(): array
+    {
+        return $this->config['pages']['extensions'];
+    }
+
+    public function shouldEncryptHistory(): bool
+    {
+        return $this->config['history']['encrypt'];
+    }
+
+    public function shouldExposeSharedPropKeys(): bool
+    {
+        return $this->config['expose_shared_prop_keys'];
+    }
+
+    public function shouldStorePreviousUrl(): bool
+    {
+        return $this->config['store_previous_url'];
+    }
+
+    public function shouldPreserveBigIntegers(): bool
+    {
+        return $this->config['preserve_big_integers'];
     }
 
     /**

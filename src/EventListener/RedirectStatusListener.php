@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 /**
- * Inertia requires a 303 (not 302) when redirecting after PUT, PATCH or DELETE,
+ * Inertia requires a 303 (not 302) when redirecting after PUT, PATCH, DELETE or QUERY,
  * otherwise the browser would repeat the redirect using the original method.
  */
 #[AsEventListener(event: ResponseEvent::class)]
@@ -25,7 +25,7 @@ class RedirectStatusListener
 
         if (
             Response::HTTP_FOUND === $response->getStatusCode()
-            && \in_array($request->getMethod(), ['PUT', 'PATCH', 'DELETE'], true)
+            && \in_array($request->getMethod(), ['PUT', 'PATCH', 'DELETE', 'QUERY'], true)
         ) {
             $response->setStatusCode(Response::HTTP_SEE_OTHER);
         }

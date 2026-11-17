@@ -1,8 +1,10 @@
 <?php
 
-namespace EvoMark\InertiaSymfonyBundle\Ssr;
+namespace EvoMark\InertiaSymfonyBundle\Interfaces;
 
-interface GatewayInterface
+use EvoMark\InertiaSymfonyBundle\Ssr\Response;
+
+interface SsrGatewayInterface
 {
     /**
      * Dispatch the Inertia page to the Server Side Rendering engine.

@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace EvoMark\InertiaSymfonyBundle\PageProps;
 
 use Closure;
-use EvoMark\InertiaSymfonyBundle\Contracts\ProvidesScrollMetadata;
+use EvoMark\InertiaSymfonyBundle\Interfaces\DeferrableInterface;
+use EvoMark\InertiaSymfonyBundle\Interfaces\MergeableInterface;
+use EvoMark\InertiaSymfonyBundle\Interfaces\ProvidesScrollMetadataInterface;
 use EvoMark\InertiaSymfonyBundle\Support\Header;
 use EvoMark\InertiaSymfonyBundle\Traits\DefersProps;
 use EvoMark\InertiaSymfonyBundle\Traits\MergesProps;
@@ -21,7 +23,7 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * @template T
  */
-class ScrollProp
+class ScrollProp implements DeferrableInterface, MergeableInterface
 {
     use DefersProps;
     use MergesProps;
@@ -37,24 +39,24 @@ class ScrollProp
     /**
      * The scroll metadata provider, or a callable that builds one from the value.
      *
-     * @var ProvidesScrollMetadata|Closure(T): ProvidesScrollMetadata|null
+     * @var ProvidesScrollMetadataInterface|\Closure(T): ProvidesScrollMetadataInterface|null
      */
-    protected ProvidesScrollMetadata|Closure|null $metadata;
+    protected ProvidesScrollMetadataInterface|\Closure|null $metadata;
 
     /**
      * Create a new merge property instance. Merge properties are combined
      * with existing client-side data during partial reloads instead of
      * completely replacing the property value.
      *
-     * @param T                                                                $value
-     * @param ProvidesScrollMetadata|callable(T): ProvidesScrollMetadata|null $metadata
+     * @param T                                                                                 $value
+     * @param ProvidesScrollMetadataInterface|callable(T): ProvidesScrollMetadataInterface|null $metadata
      */
     public function __construct(
         protected mixed $value,
         protected string $wrapper = 'data',
-        ProvidesScrollMetadata|callable|null $metadata = null,
+        ProvidesScrollMetadataInterface|callable|null $metadata = null,
     ) {
-        $this->metadata = $metadata instanceof ProvidesScrollMetadata || null === $metadata
+        $this->metadata = $metadata instanceof ProvidesScrollMetadataInterface || null === $metadata
             ? $metadata
             : $metadata(...);
         $this->merge = true;
@@ -76,14 +78,14 @@ class ScrollProp
     /**
      * Resolve the scroll metadata provider.
      */
-    protected function resolveMetadataProvider(): ProvidesScrollMetadata
+    protected function resolveMetadataProvider(): ProvidesScrollMetadataInterface
     {
-        if ($this->metadata instanceof ProvidesScrollMetadata) {
+        if ($this->metadata instanceof ProvidesScrollMetadataInterface) {
             return $this->metadata;
         }
 
         if (null === $this->metadata) {
-            throw new LogicException(\sprintf('A scroll prop needs a metadata provider: pass a "%s" or a callable returning one.', ProvidesScrollMetadata::class));
+            throw new \LogicException(\sprintf('A scroll prop needs a metadata provider: pass a "%s" or a callable returning one.', ProvidesScrollMetadataInterface::class));
         }
 
         return ($this->metadata)($this());

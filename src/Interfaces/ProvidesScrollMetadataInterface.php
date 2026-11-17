@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace EvoMark\InertiaSymfonyBundle\Contracts;
+namespace EvoMark\InertiaSymfonyBundle\Interfaces;
 
 /**
  * Describes the pagination state of a scroll prop.
@@ -10,7 +10,7 @@ namespace EvoMark\InertiaSymfonyBundle\Contracts;
  * Symfony has no built-in paginator, so implement this on an adapter around
  * whichever paginator you use (Doctrine, Pagerfanta, KnpPaginator, ...).
  */
-interface ProvidesScrollMetadata
+interface ProvidesScrollMetadataInterface
 {
     /**
      * Get the name of the query parameter that holds the page number.

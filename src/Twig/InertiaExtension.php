@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace EvoMark\InertiaSymfonyBundle\Twig;
 
 use EvoMark\InertiaSymfonyBundle\Config\InertiaConfig;
-use EvoMark\InertiaSymfonyBundle\Ssr\GatewayInterface;
 use EvoMark\InertiaSymfonyBundle\Ssr\Response;
+use EvoMark\InertiaSymfonyBundle\Ssr\SsrState;
 use Twig\Extension\AbstractExtension;
 use Twig\Markup;
 use Twig\TwigFunction;
@@ -15,7 +15,7 @@ class InertiaExtension extends AbstractExtension
 {
     public function __construct(
         private InertiaConfig $config,
-        private GatewayInterface $gateway,
+        private SsrState $ssrState,
     ) {
     }
 
@@ -27,34 +27,49 @@ class InertiaExtension extends AbstractExtension
         ];
     }
 
-    public function inertiaHeadFunction($page)
+    /**
+     * The server-side rendered head tags, or nothing when SSR is off or fails.
+     *
+     * @param array<string, mixed> $page
+     */
+    public function inertiaHeadFunction(array $page): Markup
     {
-        if ($this->config->isSsr()) {
-            $response = $this->gateway->dispatch($page);
-            if ($response instanceof Response) {
-                return new Markup($response->head, 'UTF-8');
-            }
-        }
-
-        return new Markup('', 'UTF-8');
+        return new Markup($this->render($page)?->head ?? '', 'UTF-8');
     }
 
-    public function inertiaAppFunction($page, string $id = 'app')
+    /**
+     * The server-side rendered app, or the page data and the element the client
+     * mounts on (`app` unless another id is given).
+     *
+     * @param array<string, mixed> $page
+     */
+    public function inertiaAppFunction(array $page, string $id = 'app'): Markup
     {
-        if ($this->config->isSsr()) {
-            $response = $this->gateway->dispatch($page);
-            if ($response instanceof Response) {
-                return new Markup($response->body, 'UTF-8');
-            }
+        if (null !== $response = $this->render($page)) {
+            return new Markup($response->body, 'UTF-8');
         }
 
-        $formattedId = htmlspecialchars($id);
+        $id = htmlspecialchars('' === $id ? 'app' : $id);
 
-        return new Markup(sprintf(
+        return new Markup(\sprintf(
             '<script data-page="%s" type="application/json">%s</script><div id="%s"></div>',
-            $formattedId,
-            json_encode($page, JSON_HEX_TAG),
-            $formattedId
+            $id,
+            json_encode($page, \JSON_HEX_TAG | \JSON_THROW_ON_ERROR),
+            $id,
         ), 'UTF-8');
+    }
+
+    /**
+     * Render the page on the SSR server, once per page however many functions ask.
+     *
+     * @param array<string, mixed> $page
+     */
+    private function render(array $page): ?Response
+    {
+        if (!$this->config->isSsr()) {
+            return null;
+        }
+
+        return $this->ssrState->setPage($page)->dispatch();
     }
 }

@@ -17,8 +17,13 @@ class EvoMarkInertiaSymfonyBundle extends AbstractBundle
         $definition->rootNode()
             ->children()
                 ->scalarNode('root_view')->defaultValue('app.html.twig')->end()
-                // Asset version sent to clients; null disables version checking
+                // Fixed asset version sent to clients. When null, the version is derived
+                // from asset_url, then the build manifest
                 ->scalarNode('version')->defaultNull()->end()
+                // Base URL assets are served from (e.g. a CDN): when set, its hash is the version
+                ->scalarNode('asset_url')->defaultNull()->end()
+                // Build manifest hashed to derive the version (Vite/Reprise and Encore both write it here)
+                ->scalarNode('manifest_path')->defaultValue('%kernel.project_dir%/public/build/manifest.json')->end()
                 ->arrayNode('ssr')
                     ->addDefaultsIfNotSet()
                     ->children()
@@ -29,7 +34,7 @@ class EvoMarkInertiaSymfonyBundle extends AbstractBundle
                         ->stringNode('hot_url')->defaultNull()->end()
                         ->integerNode('timeout')->defaultNull()->end()
                         ->booleanNode('ensure_bundle_exists')->defaultTrue()->end()
-                        ->scalarNode('bundle')->defaultNull()->end()
+                        ->scalarNode('bundle')->defaultValue('%kernel.project_dir%/var/ssr/ssr.js')->end()
                         ->booleanNode('throw_on_error')->defaultFalse()->end()
                     ->end()
                 ->end()
@@ -39,7 +44,7 @@ class EvoMarkInertiaSymfonyBundle extends AbstractBundle
                         ->booleanNode('ensure_pages_exist')->defaultFalse()->end()
                         ->arrayNode('paths')
                             ->scalarPrototype()->end()
-                            ->defaultValue(['%kernel.project_dir%/assets/js/pages'])
+                            ->defaultValue(['%kernel.project_dir%/assets/pages'])
                         ->end()
                         ->arrayNode('extensions')
                             ->scalarPrototype()->end()

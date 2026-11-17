@@ -2,6 +2,7 @@
 
 namespace EvoMark\InertiaSymfonyBundle\EventListener;
 
+use EvoMark\InertiaSymfonyBundle\Support\Header;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
@@ -18,6 +19,11 @@ class VaryHeaderListener
             return;
         }
 
-        $event->getResponse()->setVary('X-Inertia', false);
+        $response = $event->getResponse();
+
+        // Keep existing values, drop empty ones and don't add X-Inertia twice.
+        $vary = array_values(array_unique(array_filter([...$response->getVary(), Header::INERTIA])));
+
+        $response->setVary($vary);
     }
 }

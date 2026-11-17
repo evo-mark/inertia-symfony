@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace EvoMark\InertiaSymfonyBundle\PageProps;
 
+use EvoMark\InertiaSymfonyBundle\Interfaces\OnceableInterface;
 use EvoMark\InertiaSymfonyBundle\Traits\ResolvesCallables;
 use EvoMark\InertiaSymfonyBundle\Traits\ResolvesOnce;
 
-class OnceProp
+class OnceProp implements OnceableInterface
 {
     use ResolvesCallables;
     use ResolvesOnce;
@@ -18,7 +19,6 @@ class OnceProp
     {
         $this->callback = $callback;
         $this->once = true;
-
     }
 
     public function __invoke(): mixed
