@@ -16,6 +16,7 @@ export default defineConfig({
                 text: "Guide",
                 items: [
                     { text: "Getting started", link: "/guide/getting-started" },
+                    { text: "Frontend setup", link: "/guide/frontend" },
                     { text: "Pages and responses", link: "/guide/responses" },
                     { text: "Props", link: "/guide/props" },
                     { text: "Validation errors", link: "/guide/validation" },

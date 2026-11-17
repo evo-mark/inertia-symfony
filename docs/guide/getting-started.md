@@ -23,7 +23,8 @@ return [
 ```
 
 You also need the client side of Inertia (`@inertiajs/vue3`, `@inertiajs/react`
-or `@inertiajs/svelte`) and a bundler to build it. Any bundler works.
+or `@inertiajs/svelte`) and a bundler to build it. See [Frontend setup](./frontend)
+for the recommended Vite setup.
 
 ## The root template
 
