@@ -1,0 +1,12 @@
+{
+	"name": "inertia-symfony",
+	"private": true,
+	"scripts": {
+		"docs": "pnpm --filter docs dev",
+		"docs:build": "pnpm --filter docs build",
+		"docs:deploy": "pnpm docs:build && gh-pages -d docs/.vitepress/dist"
+	},
+	"devDependencies": {
+		"gh-pages": "^6.3.0"
+	}
+}

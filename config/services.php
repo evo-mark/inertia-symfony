@@ -1,6 +1,7 @@
 <?php
 
 use EvoMark\InertiaSymfonyBundle\Command\MakeSubscriberCommand;
+use EvoMark\InertiaSymfonyBundle\Command\PublishViewCommand;
 use EvoMark\InertiaSymfonyBundle\EventListener\AssetVersionListener;
 use EvoMark\InertiaSymfonyBundle\EventListener\EmptyResponseListener;
 use EvoMark\InertiaSymfonyBundle\EventListener\ExceptionListener;
@@ -56,4 +57,5 @@ return static function (ContainerConfigurator $container): void {
 
     // Console commands; #[AsCommand] registers each one.
     $services->set(MakeSubscriberCommand::class);
+    $services->set(PublishViewCommand::class);
 };
