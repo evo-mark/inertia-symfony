@@ -53,6 +53,11 @@ final readonly class InertiaConfig
         return $this->config['ssr']['timeout'];
     }
 
+    public function shouldThrowOnSsrError(): bool
+    {
+        return $this->config['ssr']['throw_on_error'];
+    }
+
     public function shouldEnsurePagesExist(): bool
     {
         return $this->config['pages']['ensure_pages_exist'];

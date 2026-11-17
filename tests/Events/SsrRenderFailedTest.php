@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace EvoMark\InertiaSymfonyBundle\Tests\Ssr;
+namespace EvoMark\InertiaSymfonyBundle\Tests\Events;
 
-use EvoMark\InertiaSymfonyBundle\Ssr\SsrErrorType;
-use EvoMark\InertiaSymfonyBundle\Ssr\SsrRenderFailed;
+use EvoMark\InertiaSymfonyBundle\Enums\SsrErrorType;
+use EvoMark\InertiaSymfonyBundle\Events\SsrRenderFailed;
 use PHPUnit\Framework\TestCase;
 
 final class SsrRenderFailedTest extends TestCase

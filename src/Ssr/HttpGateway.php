@@ -6,9 +6,15 @@ use EvoMark\InertiaSymfonyBundle\Config\InertiaConfig;
 use EvoMark\InertiaSymfonyBundle\Interfaces\ConfiguresSsrRequestsInterface;
 use EvoMark\InertiaSymfonyBundle\Interfaces\DisablesSsrInterface;
 use EvoMark\InertiaSymfonyBundle\Interfaces\ExcludesSsrPathsInterface;
+use EvoMark\InertiaSymfonyBundle\Interfaces\HasHealthCheckInterface;
 use EvoMark\InertiaSymfonyBundle\Interfaces\SsrGatewayInterface;
+use EvoMark\InertiaSymfonyBundle\Enums\SsrErrorType;
+use EvoMark\InertiaSymfonyBundle\Events\SsrRenderFailed;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\HttpClient\Exception\HttpExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Contracts\Service\ResetInterface;
 
@@ -18,7 +24,7 @@ use Symfony\Contracts\Service\ResetInterface;
  * Excluded paths and the request configurator are app-wide: register them once.
  * The disable() condition is reset between requests.
  */
-class HttpGateway implements SsrGatewayInterface, ExcludesSsrPathsInterface, DisablesSsrInterface, ConfiguresSsrRequestsInterface, ResetInterface
+class HttpGateway implements SsrGatewayInterface, ExcludesSsrPathsInterface, DisablesSsrInterface, ConfiguresSsrRequestsInterface, HasHealthCheckInterface, ResetInterface
 {
     /**
      * Paths (or full URLs) that are never server-side rendered; `*` matches anything.
@@ -43,6 +49,7 @@ class HttpGateway implements SsrGatewayInterface, ExcludesSsrPathsInterface, Dis
         private HttpClientInterface $httpClient,
         private InertiaConfig $config,
         private RequestStack $requestStack,
+        private EventDispatcherInterface $eventDispatcher,
     ) {
     }
 
@@ -53,7 +60,7 @@ class HttpGateway implements SsrGatewayInterface, ExcludesSsrPathsInterface, Dis
         }
 
         try {
-            $content = $this->httpClient->request('POST', $this->getUrl('/render'), $this->requestOptions([
+            $content = $this->httpClient->request('POST', $this->getProductionUrl('/render'), $this->requestOptions([
                 ...(null !== $this->config->getSsrTimeout() ? ['timeout' => $this->config->getSsrTimeout()] : []),
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -61,6 +68,14 @@ class HttpGateway implements SsrGatewayInterface, ExcludesSsrPathsInterface, Dis
                 ],
                 'body' => json_encode($page, \JSON_THROW_ON_ERROR),
             ]))->toArray();
+        } catch (TransportExceptionInterface $e) {
+            $this->handleFailure(new SsrRenderFailed($page, $e->getMessage(), SsrErrorType::Connection), $e);
+
+            return null;
+        } catch (HttpExceptionInterface $e) {
+            $this->handleFailure($this->eventFromResponse($page, $e), $e);
+
+            return null;
         } catch (\Exception) {
             return null;
         }
@@ -69,6 +84,20 @@ class HttpGateway implements SsrGatewayInterface, ExcludesSsrPathsInterface, Dis
             implode("\n", $content['head'] ?? []),
             $content['body'] ?? '',
         );
+    }
+
+    /**
+     * Whether the SSR server answers its health endpoint with a 2xx response.
+     */
+    public function isHealthy(): bool
+    {
+        try {
+            $status = $this->httpClient->request('GET', $this->getProductionUrl('/health'), $this->requestOptions([]))->getStatusCode();
+        } catch (\Exception) {
+            return false;
+        }
+
+        return $status >= 200 && $status < 300;
     }
 
     /**
@@ -113,6 +142,44 @@ class HttpGateway implements SsrGatewayInterface, ExcludesSsrPathsInterface, Dis
         $this->disabled = null;
     }
 
+    /**
+     * Dispatch the failure event, then throw when `ssr.throw_on_error` is enabled.
+     *
+     * @throws SsrException
+     */
+    protected function handleFailure(SsrRenderFailed $event, ?\Throwable $previous = null): void
+    {
+        $this->eventDispatcher->dispatch($event);
+
+        if ($this->config->shouldThrowOnSsrError()) {
+            throw SsrException::fromEvent($event, $previous);
+        }
+    }
+
+    /**
+     * Build the failure event from an error response of the SSR server.
+     *
+     * @param array<string, mixed> $page
+     */
+    protected function eventFromResponse(array $page, HttpExceptionInterface $exception): SsrRenderFailed
+    {
+        try {
+            $body = $exception->getResponse()->toArray(false);
+        } catch (\Exception) {
+            $body = [];
+        }
+
+        return new SsrRenderFailed(
+            $page,
+            $body['error'] ?? 'Unknown SSR error',
+            SsrErrorType::fromString($body['type'] ?? null),
+            $body['hint'] ?? null,
+            $body['browserApi'] ?? null,
+            $body['stack'] ?? null,
+            $body['sourceLocation'] ?? null,
+        );
+    }
+
     protected function ssrIsEnabled(): bool
     {
         if (null !== $this->disabled) {
@@ -145,7 +212,7 @@ class HttpGateway implements SsrGatewayInterface, ExcludesSsrPathsInterface, Dis
     /**
      * The SSR server URL for the given endpoint.
      */
-    protected function getUrl(string $path): string
+    public function getProductionUrl(string $path): string
     {
         return rtrim($this->config->getSsrUrl(), '/').$path;
     }

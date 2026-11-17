@@ -6,6 +6,7 @@ namespace EvoMark\InertiaSymfonyBundle\Tests\Fixtures;
 
 use EvoMark\InertiaSymfonyBundle\EvoMarkInertiaSymfonyBundle;
 use EvoMark\InertiaSymfonyBundle\Http\Response as InertiaResponse;
+use Psr\Log\NullLogger;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Bundle\TwigBundle\TwigBundle;
@@ -83,6 +84,9 @@ final class TestKernel extends Kernel
                 'storage_factory_id' => 'session.storage.factory.mock_file',
             ],
         ]);
+
+        // Without a logger service the framework logs every request to stderr.
+        $container->services()->set('logger', NullLogger::class)->public();
 
         $container->extension('twig', [
             'default_path' => __DIR__.'/templates',

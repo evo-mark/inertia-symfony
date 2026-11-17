@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace EvoMark\InertiaSymfonyBundle\Tests\Ssr;
+namespace EvoMark\InertiaSymfonyBundle\Tests\Events;
 
 use EvoMark\InertiaSymfonyBundle\Ssr\HttpGateway;
-use EvoMark\InertiaSymfonyBundle\Ssr\SsrErrorType;
+use EvoMark\InertiaSymfonyBundle\Enums\SsrErrorType;
 use EvoMark\InertiaSymfonyBundle\Ssr\SsrException;
-use EvoMark\InertiaSymfonyBundle\Ssr\SsrRenderFailed;
+use EvoMark\InertiaSymfonyBundle\Events\SsrRenderFailed;
 use EvoMark\InertiaSymfonyBundle\Tests\Fixtures\TestKernel;
 use EvoMark\InertiaSymfonyBundle\Tests\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
