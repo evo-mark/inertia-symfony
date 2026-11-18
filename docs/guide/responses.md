@@ -20,6 +20,9 @@ return $inertia->render('Users/Show')
 `render()` accepts these arguments: `$component`, `$props`, `$viewData`, `$context`
 and `$url`. The component can also be a backed or unit enum.
 
+For pages with fixed props and no logic of their own, you can skip the controller
+and render them straight from a route: see [Pages without a controller](./routes).
+
 Props can be a plain array, a `JsonSerializable`, or a
 [props provider](./props#props-providers). Objects are normalised with the Symfony
 Serializer when it is installed. Pass extra Serializer context as the fourth
@@ -97,3 +100,55 @@ $inertia->encryptHistory(false); // opt out when history.encrypt is on
 ```
 
 Set [`history.encrypt`](/reference/configuration#history) to encrypt every page.
+
+### Encrypting history per route
+
+Encrypted history keeps a page's props out of the browser's history state, so they
+can't be read back after the user logs out, for example by pressing Back. To
+encrypt the pages of particular controllers or actions, add `#[EncryptHistory]`:
+
+```php
+use EvoMark\InertiaSymfonyBundle\Attribute\EncryptHistory;
+
+#[EncryptHistory]
+final class AccountController extends AbstractController
+{
+    #[Route('/account', name: 'app_account')]
+    public function show(InertiaInterface $inertia): InertiaResponse
+    {
+        return $inertia->render('Account/Show'); // encrypted
+    }
+
+    #[EncryptHistory(false)]
+    #[Route('/account/help', name: 'app_account_help')]
+    public function help(InertiaInterface $inertia): InertiaResponse
+    {
+        return $inertia->render('Account/Help'); // not encrypted
+    }
+}
+```
+
+On a class, the attribute applies to every action, and an action's own attribute
+overrides it. `#[EncryptHistory(false)]` also opts an action out when
+`history.encrypt` is on for the whole app.
+
+Routes without a controller of their own, such as those rendered by
+[`InertiaController`](./routes), can't carry an attribute. Set the
+`_encrypt_history` route default instead:
+
+```php
+$routes->add('app_privacy', '/privacy')
+    ->controller(InertiaController::class)
+    ->defaults(['component' => 'Privacy', '_encrypt_history' => true]);
+```
+
+The route default works on any route, and wins over the controller's attribute,
+since one controller can serve several routes.
+
+From most to least specific, the first that applies decides:
+
+1. `$inertia->encryptHistory()` called while handling the request
+2. the `_encrypt_history` route default
+3. `#[EncryptHistory]` on the action
+4. `#[EncryptHistory]` on the controller class
+5. the `history.encrypt` config

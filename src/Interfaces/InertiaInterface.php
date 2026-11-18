@@ -15,6 +15,7 @@ use EvoMark\InertiaSymfonyBundle\PageProps\ScrollProp;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 interface InertiaInterface
 {
@@ -98,6 +99,11 @@ interface InertiaInterface
      * @param \BackedEnum|\UnitEnum|string|array<string, mixed> $key
      */
     public function flash(\BackedEnum|\UnitEnum|string|array $key, mixed $value = null): static;
+
+    /**
+     * @param ConstraintViolationListInterface|array<string, string|list<string>> $errors
+     */
+    public function withErrors(ConstraintViolationListInterface|array $errors, string $bag = 'default'): static;
 
     /**
      * @return array<string, mixed>

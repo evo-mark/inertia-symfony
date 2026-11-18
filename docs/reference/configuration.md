@@ -55,6 +55,11 @@ Default `true`. Sends the top-level keys of shared props in the page as `sharedP
 metadata, so the client knows which props are shared. Override it per response with
 `->exposeSharedPropKeys(false)`.
 
+### `with_all_errors`
+
+Default `false`. Sends every validation message for a field, as an array, rather than
+just the first. See [Validation](/guide/validation#every-message-per-field).
+
 ### `store_previous_url`
 
 Default `false`. Remembers each visit's URL and route in the session, which
@@ -64,7 +69,7 @@ Default `false`. Remembers each visit's URL and route in the session, which
 
 | Option | Default | |
 | --- | --- | --- |
-| `encrypt` | `false` | Encrypt the browser history state of every page. |
+| `encrypt` | `false` | Encrypt the browser history state of every page. Per route, use [`#[EncryptHistory]`](/guide/responses#encrypting-history-per-route). |
 
 ### `preserve_big_integers`
 

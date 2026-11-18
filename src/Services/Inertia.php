@@ -24,12 +24,14 @@ use EvoMark\InertiaSymfonyBundle\PageProps\ScrollProp;
 use EvoMark\InertiaSymfonyBundle\Support\Arr;
 use EvoMark\InertiaSymfonyBundle\Support\Header;
 use EvoMark\InertiaSymfonyBundle\Support\SessionKey;
+use EvoMark\InertiaSymfonyBundle\Support\ValidationErrors;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Contracts\Service\ResetInterface;
 use Twig\Environment;
 
@@ -400,6 +402,29 @@ class Inertia implements InertiaInterface, ResetInterface
         }
 
         $this->requestStack->getSession()->set(SessionKey::FLASH_DATA, [...$this->getFlashed(), ...$key]);
+
+        return $this;
+    }
+
+    /**
+     * Send errors to the next page as its `errors` prop, e.g. before redirecting
+     * back to the form: `return $inertia->withErrors($violations)->back();`.
+     * Accepts validator violations, or field => message(s) for errors that don't
+     * come from the Validator. A named bag keeps one form's errors apart from
+     * another's on the same page.
+     *
+     * @param ConstraintViolationListInterface|array<string, string|list<string>> $errors
+     */
+    public function withErrors(ConstraintViolationListInterface|array $errors, string $bag = 'default'): static
+    {
+        $errors = $errors instanceof ConstraintViolationListInterface
+            ? ValidationErrors::fromViolations($errors)
+            : ValidationErrors::fromArray($errors);
+
+        $session = $this->requestStack->getSession();
+        $bags = (array) $session->get(SessionKey::ERRORS, []);
+        $bags[$bag] = array_merge_recursive($bags[$bag] ?? [], $errors);
+        $session->set(SessionKey::ERRORS, $bags);
 
         return $this;
     }

@@ -1,0 +1,16 @@
+{
+    "bundles": {
+        "EvoMark\\InertiaSymfonyBundle\\EvoMarkInertiaSymfonyBundle": ["all"]
+    },
+    "copy-from-recipe": {
+        "config/": "%CONFIG_DIR%/"
+    },
+    "copy-from-package": {
+        "stubs/app.html.twig.stub": "templates/app.html.twig"
+    },
+    "env": {
+        "#1": "Server-side rendering: build the SSR bundle, then run bin/console inertia:start-ssr",
+        "INERTIA_SSR_ENABLED": "false",
+        "INERTIA_SSR_URL": "http://127.0.0.1:13714"
+    }
+}

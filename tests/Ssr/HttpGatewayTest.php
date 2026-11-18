@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace EvoMark\InertiaSymfonyBundle\Tests\Events;
 
-use EvoMark\InertiaSymfonyBundle\Ssr\HttpGateway;
 use EvoMark\InertiaSymfonyBundle\Enums\SsrErrorType;
-use EvoMark\InertiaSymfonyBundle\Ssr\SsrException;
 use EvoMark\InertiaSymfonyBundle\Events\SsrRenderFailed;
+use EvoMark\InertiaSymfonyBundle\Ssr\HttpGateway;
+use EvoMark\InertiaSymfonyBundle\Ssr\SsrException;
 use EvoMark\InertiaSymfonyBundle\Tests\Fixtures\TestKernel;
 use EvoMark\InertiaSymfonyBundle\Tests\TestCase;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
@@ -121,6 +122,7 @@ final class HttpGatewayTest extends TestCase
         $gateway = $this->gateway(['enabled' => true, 'bundle' => null]);
 
         $this->assertNull($gateway->dispatch(['page' => self::EXAMPLE_PAGE_OBJECT]));
+        $this->assertSame([], $this->sent, 'No request is sent without a bundle.');
     }
 
     public function testItUsesTheConfiguredHttpUrlWhenTheBundleFileIsDetected(): void
@@ -504,5 +506,107 @@ final class HttpGatewayTest extends TestCase
         $this->assertNotNull($gateway->dispatch(self::EXAMPLE_PAGE_OBJECT));
 
         $this->assertFalse(self::hasHeader($this->sent[0]['options'], 'X-Tenant'));
+    }
+
+    private ?string $buildDir = null;
+
+    protected function tearDown(): void
+    {
+        if (null !== $this->buildDir) {
+            new Filesystem()->remove($this->buildDir);
+        }
+
+        parent::tearDown();
+    }
+
+    /**
+     * Write the entrypoints.json Reprise writes into the build directory, in dev
+     * mode with the given dev server origin, or in production mode for null.
+     */
+    private function entrypoints(?string $devServerOrigin): void
+    {
+        $this->buildDir ??= sys_get_temp_dir().'/inertia-symfony-tests/build-'.bin2hex(random_bytes(4));
+        new Filesystem()->dumpFile($this->buildDir.'/entrypoints.json', json_encode([
+            'isProd' => null === $devServerOrigin,
+            'devServer' => null === $devServerOrigin ? null : ['origin' => $devServerOrigin],
+            'publicPath' => '/build/',
+            'entryPoints' => [],
+        ]));
+
+        $this->configure(['manifest_path' => $this->buildDir.'/manifest.json']);
+    }
+
+    public function testItUsesTheViteDevServerWhileItIsRunning(): void
+    {
+        $this->entrypoints('http://127.0.0.1:5173');
+        $gateway = $this->gateway(['enabled' => true, 'bundle' => null], [
+            'http://127.0.0.1:5173/__inertia_ssr' => self::json([
+                'head' => ['<title>Dev SSR</title>'],
+                'body' => '<div id="app">Dev SSR Response</div>',
+            ]),
+        ]);
+
+        $response = $gateway->dispatch(self::EXAMPLE_PAGE_OBJECT);
+
+        $this->assertNotNull($response, 'The dev server renders without a built bundle.');
+        $this->assertSame('<div id="app">Dev SSR Response</div>', $response->body);
+        $this->assertSame(['http://127.0.0.1:5173/__inertia_ssr'], array_column($this->sent, 'url'));
+    }
+
+    public function testItUsesTheConfiguredHotUrlWhileTheDevServerIsRunning(): void
+    {
+        $this->entrypoints('http://127.0.0.1:5173');
+        $gateway = $this->gateway(['enabled' => true, 'hot_url' => 'http://host.containers.internal:5173/'], [
+            'http://host.containers.internal:5173/__inertia_ssr' => self::json(['head' => [], 'body' => '<div id="app"></div>']),
+        ]);
+
+        $this->assertNotNull($gateway->dispatch(self::EXAMPLE_PAGE_OBJECT));
+        $this->assertSame(['http://host.containers.internal:5173/__inertia_ssr'], array_column($this->sent, 'url'));
+    }
+
+    public function testAnEmptyHotUrlUsesTheReportedOrigin(): void
+    {
+        $this->entrypoints('http://127.0.0.1:5173');
+        $gateway = $this->gateway(['enabled' => true, 'hot_url' => ''], [
+            'http://127.0.0.1:5173/__inertia_ssr' => self::json(['head' => [], 'body' => '<div id="app"></div>']),
+        ]);
+
+        $this->assertNotNull($gateway->dispatch(self::EXAMPLE_PAGE_OBJECT));
+        $this->assertSame(['http://127.0.0.1:5173/__inertia_ssr'], array_column($this->sent, 'url'));
+    }
+
+    public function testTheHotUrlIsIgnoredWhenTheDevServerIsNotRunning(): void
+    {
+        $this->entrypoints(null);
+        $this->configure(['ssr' => ['enabled' => true, 'bundle' => self::BUNDLE, 'hot_url' => 'http://host.containers.internal:5173']]);
+        $gateway = $this->gateway(responses: [
+            $this->productionUrl() => self::json(['head' => [], 'body' => '<div id="app"></div>']),
+        ]);
+
+        $this->assertNotNull($gateway->dispatch(self::EXAMPLE_PAGE_OBJECT));
+        $this->assertSame([$this->productionUrl()], array_column($this->sent, 'url'));
+    }
+
+    public function testAnUnreachableDevServerFallsBackToClientSideRendering(): void
+    {
+        // Reprise leaves the dev entrypoints.json behind when the dev server stops.
+        $this->entrypoints('http://127.0.0.1:5173');
+        $gateway = $this->gateway(['enabled' => true, 'bundle' => null], self::failedConnection());
+        $events = $this->captureSsrRenderFailedEvents();
+
+        $this->assertNull($gateway->dispatch(self::EXAMPLE_PAGE_OBJECT));
+        $this->assertCount(1, $events);
+        $this->assertSame(SsrErrorType::Connection, $events[0]->type);
+    }
+
+    public function testItReturnsNullWhileTheDevServerWarmsUp(): void
+    {
+        // The dev server answers `null` until its SSR module graph has loaded.
+        $this->entrypoints('http://127.0.0.1:5173');
+        $gateway = $this->gateway(['enabled' => true, 'bundle' => null], [
+            'http://127.0.0.1:5173/__inertia_ssr' => new MockResponse('null'),
+        ]);
+
+        $this->assertNull($gateway->dispatch(self::EXAMPLE_PAGE_OBJECT));
     }
 }

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        {% if title is defined %}<title>{{ title }}</title>{% endif %}
         {{ inertiaHead(page) }}
     </head>
     <body>

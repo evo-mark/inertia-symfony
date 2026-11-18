@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace EvoMark\InertiaSymfonyBundle\Tests\Fixtures;
 
+use EvoMark\InertiaSymfonyBundle\Controller\InertiaController;
 use EvoMark\InertiaSymfonyBundle\EvoMarkInertiaSymfonyBundle;
 use EvoMark\InertiaSymfonyBundle\Http\Response as InertiaResponse;
+use EvoMark\InertiaSymfonyBundle\Tests\Fixtures\Controller\AccountController;
+use EvoMark\InertiaSymfonyBundle\Tests\Fixtures\Controller\EncryptedController;
 use Psr\Log\NullLogger;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
@@ -93,10 +96,47 @@ final class TestKernel extends Kernel
         ]);
 
         $container->extension('inertia_symfony', self::$inertiaConfig);
+
+        $container->services()
+            ->defaults()->autowire()->autoconfigure()
+            ->set(EncryptedController::class)->public()->tag('controller.service_arguments')
+            ->set(AccountController::class)->public()->tag('controller.service_arguments');
     }
 
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
         $routes->add('example', '/example-url')->controller('kernel::exampleAction');
+
+        // Pages rendered straight from the route by InertiaController.
+        $routes->add('inertia_page', '/inertia-page')
+            ->controller(InertiaController::class)
+            ->defaults(['component' => 'About', 'props' => ['team' => 'Platform', 'members' => ['Ada', 'Grace']]]);
+        $routes->add('inertia_page_cached', '/inertia-page/cached')
+            ->controller(InertiaController::class)
+            ->defaults(['component' => 'About', 'maxAge' => 600, 'sharedAge' => 3600]);
+        $routes->add('inertia_page_private', '/inertia-page/private')
+            ->controller(InertiaController::class)
+            ->defaults(['component' => 'About', 'maxAge' => 600, 'private' => true]);
+        // History encryption per route.
+        $routes->add('encrypted_show', '/encrypted/show')->controller([EncryptedController::class, 'show']);
+        $routes->add('encrypted_public', '/encrypted/public')->controller([EncryptedController::class, 'public']);
+        $routes->add('account_billing', '/account/billing')->controller([AccountController::class, 'billing']);
+        $routes->add('account_dashboard', '/account/dashboard')->controller([AccountController::class, 'dashboard']);
+        $routes->add('account_dashboard_encrypted', '/account/dashboard/encrypted')
+            ->controller([AccountController::class, 'dashboard'])
+            ->defaults(['_encrypt_history' => true]);
+        $routes->add('encrypted_public_by_route', '/encrypted/public/by-route')
+            ->controller([EncryptedController::class, 'show'])
+            ->defaults(['_encrypt_history' => false]);
+        $routes->add('example_encrypted', '/example-url/encrypted')
+            ->controller('kernel::exampleAction')
+            ->defaults(['_encrypt_history' => true]);
+        $routes->add('inertia_page_encrypted', '/inertia-page/encrypted')
+            ->controller(InertiaController::class)
+            ->defaults(['component' => 'About', '_encrypt_history' => true]);
+
+        $routes->add('inertia_page_gone', '/inertia-page/gone')
+            ->controller(InertiaController::class)
+            ->defaults(['component' => 'Gone', 'statusCode' => 410, 'headers' => ['X-Robots-Tag' => 'noindex'], 'viewData' => ['title' => 'Gone']]);
     }
 }

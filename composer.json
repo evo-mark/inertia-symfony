@@ -1,47 +1,53 @@
 {
-  "name": "evo-mark/inertia-symfony",
-  "description": "Inertia.js adapter for Symfony",
-  "type": "symfony-bundle",
-  "license": "MIT",
-  "scripts": {
-    "cs:check": [
-      "./vendor/bin/php-cs-fixer check"
-    ],
-    "cs:fix": [
-      "./vendor/bin/php-cs-fixer fix"
-    ],
-    "test": [
-      "./vendor/bin/phpunit"
-    ]
-  },
-  "require": {
-    "php": ">=8.4",
-    "ext-json": "*",
-    "symfony/clock": "^8.1",
-    "symfony/console": "^8.1",
-    "symfony/dependency-injection": "^8.0",
-    "symfony/filesystem": "^8.0",
-    "symfony/framework-bundle": "^8.0",
-    "symfony/http-foundation": "^8.0",
-    "symfony/http-kernel": "^8.0",
-    "symfony/http-client": "^8.0",
-    "twig/twig": "^2.12|^3.0"
-  },
-  "require-dev": {
-    "symfony/test-pack": "^1.0",
-    "friendsofphp/php-cs-fixer": "^3.95",
-    "symfony/serializer": "^8.1",
-    "symfony/twig-bundle": "^8.1",
-    "symfony/mime": "^8.0"
-  },
-  "autoload": {
-    "psr-4": {
-      "EvoMark\\InertiaSymfonyBundle\\": "src/"
+    "name": "evo-mark/inertia-symfony",
+    "description": "Inertia.js adapter for Symfony",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "scripts": {
+        "cs:check": [
+            "./vendor/bin/php-cs-fixer check"
+        ],
+        "cs:fix": [
+            "./vendor/bin/php-cs-fixer fix"
+        ],
+        "test": [
+            "./vendor/bin/phpunit"
+        ]
+    },
+    "require": {
+        "php": ">=8.4",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "symfony/clock": "^8.1",
+        "symfony/console": "^8.1",
+        "symfony/dependency-injection": "^8.0",
+        "symfony/filesystem": "^8.0",
+        "symfony/framework-bundle": "^8.0",
+        "symfony/http-foundation": "^8.0",
+        "symfony/http-kernel": "^8.0",
+        "symfony/http-client": "^8.0",
+        "twig/twig": "^2.12|^3.0",
+        "symfony/process": "^8.0"
+    },
+    "require-dev": {
+        "symfony/test-pack": "^1.0",
+        "friendsofphp/php-cs-fixer": "^3.95",
+        "symfony/serializer": "^8.1",
+        "symfony/twig-bundle": "^8.1",
+        "symfony/mime": "^8.0",
+        "symfony/validator": "^8.0"
+    },
+    "suggest": {
+        "symfony/validator": "Send #[MapRequestPayload] validation errors back to Inertia forms"
+    },
+    "autoload": {
+        "psr-4": {
+            "EvoMark\\InertiaSymfonyBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "EvoMark\\InertiaSymfonyBundle\\Tests\\": "tests/"
+        }
     }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "EvoMark\\InertiaSymfonyBundle\\Tests\\": "tests/"
-    }
-  }
 }

@@ -4,15 +4,48 @@ declare(strict_types=1);
 
 namespace EvoMark\InertiaSymfonyBundle\Ssr;
 
+use EvoMark\InertiaSymfonyBundle\Config\InertiaConfig;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+/**
+ * Finds the built SSR bundle: the configured `ssr.bundle`, otherwise the first
+ * of the common Vite output names in `var/ssr/` that exists.
+ */
 class BundleDetector
 {
     /**
-     * Detect and return the path to the SSR bundle file.
-     *
-     * @return string|null
+     * Where an SSR build is looked for when `ssr.bundle` does not exist,
+     * relative to the project directory.
      */
-    public function detect()
+    private const array FALLBACKS = [
+        'var/ssr/ssr.js',
+        'var/ssr/ssr.mjs',
+        'var/ssr/app.js',
+        'var/ssr/app.mjs',
+    ];
+
+    public function __construct(
+        private InertiaConfig $config,
+        #[Autowire('%kernel.project_dir%')] private string $projectDir,
+    ) {
+    }
+
+    /**
+     * Detect and return the path to the SSR bundle file.
+     */
+    public function detect(): ?string
     {
+        $candidates = [
+            $this->config->getSsrBundle(),
+            ...array_map(fn (string $path): string => $this->projectDir.'/'.$path, self::FALLBACKS),
+        ];
+
+        foreach ($candidates as $path) {
+            if (null !== $path && '' !== $path && is_file($path)) {
+                return $path;
+            }
+        }
+
         return null;
     }
 }

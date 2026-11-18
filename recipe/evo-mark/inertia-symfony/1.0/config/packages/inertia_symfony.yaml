@@ -1,0 +1,15 @@
+# Inertia.js adapter for Symfony
+# All options: bin/console config:dump-reference inertia_symfony
+inertia_symfony:
+    # The Twig template every page is rendered into on a full page load
+    root_view: app.html.twig
+
+    ssr:
+        enabled: '%env(bool:INERTIA_SSR_ENABLED)%'
+        url: '%env(INERTIA_SSR_URL)%'
+
+when@test:
+    inertia_symfony:
+        # Tests render pages client-side, without an SSR server
+        ssr:
+            enabled: false

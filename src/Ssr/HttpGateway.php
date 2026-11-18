@@ -3,13 +3,13 @@
 namespace EvoMark\InertiaSymfonyBundle\Ssr;
 
 use EvoMark\InertiaSymfonyBundle\Config\InertiaConfig;
+use EvoMark\InertiaSymfonyBundle\Enums\SsrErrorType;
+use EvoMark\InertiaSymfonyBundle\Events\SsrRenderFailed;
 use EvoMark\InertiaSymfonyBundle\Interfaces\ConfiguresSsrRequestsInterface;
 use EvoMark\InertiaSymfonyBundle\Interfaces\DisablesSsrInterface;
 use EvoMark\InertiaSymfonyBundle\Interfaces\ExcludesSsrPathsInterface;
-use EvoMark\InertiaSymfonyBundle\Interfaces\HasHealthCheckInterface;
 use EvoMark\InertiaSymfonyBundle\Interfaces\SsrGatewayInterface;
-use EvoMark\InertiaSymfonyBundle\Enums\SsrErrorType;
-use EvoMark\InertiaSymfonyBundle\Events\SsrRenderFailed;
+use EvoMark\InertiaSymfonyBundle\Interfaces\SsrHasHealthCheckInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
@@ -24,7 +24,7 @@ use Symfony\Contracts\Service\ResetInterface;
  * Excluded paths and the request configurator are app-wide: register them once.
  * The disable() condition is reset between requests.
  */
-class HttpGateway implements SsrGatewayInterface, ExcludesSsrPathsInterface, DisablesSsrInterface, ConfiguresSsrRequestsInterface, HasHealthCheckInterface, ResetInterface
+class HttpGateway implements SsrGatewayInterface, ExcludesSsrPathsInterface, DisablesSsrInterface, ConfiguresSsrRequestsInterface, SsrHasHealthCheckInterface, ResetInterface
 {
     /**
      * Paths (or full URLs) that are never server-side rendered; `*` matches anything.
@@ -50,6 +50,8 @@ class HttpGateway implements SsrGatewayInterface, ExcludesSsrPathsInterface, Dis
         private InertiaConfig $config,
         private RequestStack $requestStack,
         private EventDispatcherInterface $eventDispatcher,
+        private BundleDetector $bundleDetector,
+        private ?DevServerDetector $devServerDetector = null,
     ) {
     }
 
@@ -59,8 +61,16 @@ class HttpGateway implements SsrGatewayInterface, ExcludesSsrPathsInterface, Dis
             return null;
         }
 
+        // While the Vite dev server runs it renders pages itself, without a built bundle.
+        $hotUrl = $this->getHotUrl('/__inertia_ssr');
+
+        // Without a built bundle there is no SSR server to call, so skip the request.
+        if (null === $hotUrl && $this->config->shouldEnsureSsrBundleExists() && !$this->bundleExists()) {
+            return null;
+        }
+
         try {
-            $content = $this->httpClient->request('POST', $this->getProductionUrl('/render'), $this->requestOptions([
+            $content = $this->httpClient->request('POST', $hotUrl ?? $this->getProductionUrl('/render'), $this->requestOptions([
                 ...(null !== $this->config->getSsrTimeout() ? ['timeout' => $this->config->getSsrTimeout()] : []),
                 'headers' => [
                     'Content-Type' => 'application/json',
@@ -180,6 +190,14 @@ class HttpGateway implements SsrGatewayInterface, ExcludesSsrPathsInterface, Dis
         );
     }
 
+    /**
+     * Whether the built SSR bundle can be found.
+     */
+    protected function bundleExists(): bool
+    {
+        return null !== $this->bundleDetector->detect();
+    }
+
     protected function ssrIsEnabled(): bool
     {
         if (null !== $this->disabled) {
@@ -207,6 +225,22 @@ class HttpGateway implements SsrGatewayInterface, ExcludesSsrPathsInterface, Dis
         }
 
         return false;
+    }
+
+    /**
+     * The Vite dev server URL for the given endpoint while it is running: the
+     * `ssr.hot_url` config if set, otherwise the origin Reprise reports. Null when
+     * no dev server is running.
+     */
+    public function getHotUrl(string $path): ?string
+    {
+        $origin = $this->devServerDetector?->getOrigin();
+
+        if (null === $origin) {
+            return null;
+        }
+
+        return rtrim($this->config->getSsrHotUrl() ?? $origin, '/').$path;
     }
 
     /**

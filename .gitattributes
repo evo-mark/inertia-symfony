@@ -1,0 +1,2 @@
+# Not part of the package: the Flex recipe lives in a recipe repository.
+/recipe export-ignore

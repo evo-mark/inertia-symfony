@@ -1,0 +1,13 @@
+  * Install the Inertia client and the Vite plugin:
+    <fg=green>npm install -D @evomark/inertia-reprise @inertiajs/vue3 vue</>
+
+  * Render a page from a controller:
+    <fg=green>return $inertia->render('Home', ['user' => $user]);</>
+
+  * Share props with every page:
+    <fg=green>php bin/console inertia:subscriber</>
+
+  * The root template is <fg=green>templates/app.html.twig</>; it loads assets
+    with Symfony Reprise. Using AssetMapper or Encore? Swap its asset tags.
+
+  * Read the documentation at <comment>https://evo-mark.github.io/inertia-symfony/</>

@@ -2,6 +2,7 @@
 
 namespace EvoMark\InertiaSymfonyBundle\EventListener;
 
+use EvoMark\InertiaSymfonyBundle\Config\InertiaConfig;
 use EvoMark\InertiaSymfonyBundle\Interfaces\InertiaInterface;
 use EvoMark\InertiaSymfonyBundle\Support\Header;
 use EvoMark\InertiaSymfonyBundle\Support\SessionKey;
@@ -20,8 +21,10 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 #[AsEventListener(event: RequestEvent::class)]
 final class ValidationErrorsListener
 {
-    public function __construct(private InertiaInterface $inertia)
-    {
+    public function __construct(
+        private InertiaInterface $inertia,
+        private InertiaConfig $config,
+    ) {
     }
 
     public function __invoke(RequestEvent $event): void
@@ -51,9 +54,15 @@ final class ValidationErrorsListener
             return (object) [];
         }
 
+        $allErrors = $this->config->withAllErrors();
+
         $bags = array_map(
             static fn (array $bag): object => (object) array_map(
-                static fn (string|array $messages): string => \is_array($messages) ? (string) reset($messages) : $messages,
+                static fn (string|array $messages): string|array => match (true) {
+                    !\is_array($messages) => $allErrors ? [$messages] : $messages,
+                    $allErrors => array_values($messages),
+                    default => (string) reset($messages),
+                },
                 $bag,
             ),
             $bags,

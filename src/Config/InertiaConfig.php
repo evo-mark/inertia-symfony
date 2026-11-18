@@ -53,6 +53,44 @@ final readonly class InertiaConfig
         return $this->config['ssr']['timeout'];
     }
 
+    /**
+     * The Vite dev server URL to render with while it is running, overriding the
+     * origin it reports (e.g. when PHP runs in a container and Vite does not).
+     */
+    public function getSsrHotUrl(): ?string
+    {
+        $url = $this->config['ssr']['hot_url'] ?? null;
+
+        // An empty value (e.g. an unset env var) means no override.
+        return null === $url || '' === $url ? null : $url;
+    }
+
+    /**
+     * The configured path of the built SSR bundle, if any.
+     */
+    public function getSsrBundle(): ?string
+    {
+        return $this->config['ssr']['bundle'];
+    }
+
+    /**
+     * The runtime that runs the SSR bundle, e.g. `node` or `bun`.
+     */
+    public function getSsrRuntime(): string
+    {
+        return $this->config['ssr']['runtime'];
+    }
+
+    public function shouldEnsureSsrRuntimeExists(): bool
+    {
+        return $this->config['ssr']['ensure_runtime_exists'];
+    }
+
+    public function shouldEnsureSsrBundleExists(): bool
+    {
+        return $this->config['ssr']['ensure_bundle_exists'];
+    }
+
     public function shouldThrowOnSsrError(): bool
     {
         return $this->config['ssr']['throw_on_error'];
@@ -82,6 +120,14 @@ final readonly class InertiaConfig
     public function shouldEncryptHistory(): bool
     {
         return $this->config['history']['encrypt'];
+    }
+
+    /**
+     * Whether the `errors` prop holds every message per field, rather than the first.
+     */
+    public function withAllErrors(): bool
+    {
+        return $this->config['with_all_errors'] ?? false;
     }
 
     public function shouldExposeSharedPropKeys(): bool

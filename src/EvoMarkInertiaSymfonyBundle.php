@@ -59,6 +59,8 @@ class EvoMarkInertiaSymfonyBundle extends AbstractBundle
                     ->end()
                 ->end()
                 ->booleanNode('expose_shared_prop_keys')->defaultTrue()->end()
+                // Send every validation message per field, not just the first
+                ->booleanNode('with_all_errors')->defaultFalse()->end()
                 ->booleanNode('store_previous_url')->defaultFalse()->end()
                 ->arrayNode('history')
                     ->addDefaultsIfNotSet()
