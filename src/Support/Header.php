@@ -2,6 +2,9 @@
 
 namespace EvoMark\InertiaSymfonyBundle\Support;
 
+/**
+ * The HTTP headers of the Inertia protocol.
+ */
 class Header
 {
     /**

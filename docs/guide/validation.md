@@ -166,7 +166,7 @@ By default each field gets its first message, as a string. To send all of them, 
 an array, turn on [`with_all_errors`](/reference/configuration#with-all-errors):
 
 ```yaml
-inertia_symfony:
+evo_mark_inertia_symfony:
     with_all_errors: true
 ```
 

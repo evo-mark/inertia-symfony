@@ -7,7 +7,7 @@ It is not part of the package: Flex reads recipes from a recipe repository.
 On `composer require evo-mark/inertia-symfony` it:
 
 - registers the bundle in `config/bundles.php`;
-- creates `config/packages/inertia_symfony.yaml`, reading SSR settings from env
+- creates `config/packages/evo_mark_inertia_symfony.yaml`, reading SSR settings from env
   vars and turning SSR off in the test environment;
 - copies the package's root template stub to `templates/app.html.twig` (the file
   `bin/console inertia:view` also publishes), unless the app already has one;

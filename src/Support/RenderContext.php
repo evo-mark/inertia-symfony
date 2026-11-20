@@ -10,6 +10,10 @@ use Symfony\Component\HttpFoundation\Request;
  */
 final readonly class RenderContext
 {
+    /**
+     * @param string  $component the page component being rendered
+     * @param Request $request   the current request
+     */
     public function __construct(
         public string $component,
         public Request $request,

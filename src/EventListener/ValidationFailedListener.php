@@ -4,7 +4,6 @@ namespace EvoMark\InertiaSymfonyBundle\EventListener;
 
 use EvoMark\InertiaSymfonyBundle\Interfaces\InertiaInterface;
 use EvoMark\InertiaSymfonyBundle\Support\Header;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 
@@ -21,13 +20,18 @@ use Symfony\Component\Validator\Exception\ValidationFailedException;
  * Runs before the exception is logged (priority 0): a rejected form submission
  * is not an application error.
  */
-#[AsEventListener(event: ExceptionEvent::class, priority: 16)]
 final class ValidationFailedListener
 {
+    /**
+     * @param InertiaInterface $inertia stores the errors and builds the redirect back
+     */
     public function __construct(private InertiaInterface $inertia)
     {
     }
 
+    /**
+     * Redirect an invalid Inertia form submission back with its validation errors.
+     */
     public function __invoke(ExceptionEvent $event): void
     {
         if (!$event->isMainRequest() || !$event->getRequest()->headers->has(Header::INERTIA)) {

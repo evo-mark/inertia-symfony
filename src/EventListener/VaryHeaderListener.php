@@ -3,16 +3,17 @@
 namespace EvoMark\InertiaSymfonyBundle\EventListener;
 
 use EvoMark\InertiaSymfonyBundle\Support\Header;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 /**
  * The same URL returns HTML or Inertia JSON depending on the X-Inertia header,
  * so caches must vary on it.
  */
-#[AsEventListener(event: ResponseEvent::class)]
 class VaryHeaderListener
 {
+    /**
+     * Add `X-Inertia` to the response's Vary header, keeping existing values.
+     */
     public function __invoke(ResponseEvent $event): void
     {
         if (!$event->isMainRequest()) {

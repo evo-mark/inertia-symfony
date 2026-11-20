@@ -9,5 +9,10 @@ use EvoMark\InertiaSymfonyBundle\Support\PropertyContext;
  */
 interface ProvidesInertiaPropertyInterface
 {
+    /**
+     * The prop's value.
+     *
+     * @param PropertyContext $prop the prop's key, the page's props and the request
+     */
     public function toInertiaProperty(PropertyContext $prop): mixed;
 }

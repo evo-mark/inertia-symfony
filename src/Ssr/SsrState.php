@@ -28,6 +28,9 @@ class SsrState implements ResetInterface
      */
     protected bool $dispatched = false;
 
+    /**
+     * @param SsrGatewayInterface $gateway renders the page
+     */
     public function __construct(private SsrGatewayInterface $gateway)
     {
     }

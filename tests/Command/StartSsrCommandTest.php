@@ -83,7 +83,7 @@ final class StartSsrCommandTest extends TestCase
             {
             }
 
-            public function log($level, \Stringable|string $message, array $context = []): void
+            public function log($level, $message, array $context = []): void
             {
                 $this->logged[] = $level.': '.strtr((string) $message, ['{output}' => $context['output'] ?? '']);
             }

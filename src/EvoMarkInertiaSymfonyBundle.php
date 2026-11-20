@@ -8,10 +8,15 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
+/**
+ * The Inertia.js adapter for Symfony. Its configuration lives under the
+ * `evo_mark_inertia_symfony` key, the alias Symfony derives from this class.
+ */
 class EvoMarkInertiaSymfonyBundle extends AbstractBundle
 {
-    protected string $extensionAlias = 'inertia_symfony';
-
+    /**
+     * The bundle's configuration tree, under `evo_mark_inertia_symfony`.
+     */
     public function configure(DefinitionConfigurator $definition): void
     {
         $definition->rootNode()
@@ -128,9 +133,17 @@ class EvoMarkInertiaSymfonyBundle extends AbstractBundle
     /**
      * @param array<string, mixed> $config
      */
+    /**
+     * Register the processed configuration as a service, then the bundle's services.
+     *
+     * @param array<string, mixed> $config
+     */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
-        $container->services()->set(InertiaConfig::class)->args([$config]);
+        $services = $container->services();
+        $services->set('evo_mark_inertia_symfony.config', InertiaConfig::class)->args([$config]);
+        $services->alias(InertiaConfig::class, 'evo_mark_inertia_symfony.config');
+
         $container->import('../config/services.php');
     }
 }

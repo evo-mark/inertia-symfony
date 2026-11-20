@@ -17,6 +17,9 @@ use EvoMark\InertiaSymfonyBundle\Config\InertiaConfig;
  */
 class DevServerDetector
 {
+    /**
+     * @param InertiaConfig $config provides the build manifest path
+     */
     public function __construct(private InertiaConfig $config)
     {
     }
@@ -47,6 +50,9 @@ class DevServerDetector
         return \is_string($origin) && '' !== $origin ? $origin : null;
     }
 
+    /**
+     * Whether a Vite dev server is running.
+     */
     public function isRunning(): bool
     {
         return null !== $this->getOrigin();

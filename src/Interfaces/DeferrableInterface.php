@@ -8,7 +8,13 @@ namespace EvoMark\InertiaSymfonyBundle\Interfaces;
  */
 interface DeferrableInterface
 {
+    /**
+     * Whether the prop is left out of the initial page load.
+     */
     public function shouldDefer(): bool;
 
+    /**
+     * The group of deferred props the prop is loaded with.
+     */
     public function group(): string;
 }

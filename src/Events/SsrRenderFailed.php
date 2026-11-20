@@ -7,6 +7,10 @@ namespace EvoMark\InertiaSymfonyBundle\Events;
 use EvoMark\InertiaSymfonyBundle\Enums\SsrErrorType;
 use Symfony\Contracts\EventDispatcher\Event;
 
+/**
+ * Dispatched when the SSR server fails to render a page, before the page falls back
+ * to client-side rendering (or an SsrException is thrown with `ssr.throw_on_error`).
+ */
 class SsrRenderFailed extends Event
 {
     /**

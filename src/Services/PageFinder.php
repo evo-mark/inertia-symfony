@@ -22,6 +22,9 @@ class PageFinder
      */
     private array $found = [];
 
+    /**
+     * @param InertiaConfig $config provides the page paths and extensions
+     */
     public function __construct(private InertiaConfig $config)
     {
     }
@@ -52,6 +55,9 @@ class PageFinder
         throw new \InvalidArgumentException(\sprintf('Page [%s] not found.', $component));
     }
 
+    /**
+     * Whether the given component has a page file.
+     */
     public function exists(string $component): bool
     {
         try {

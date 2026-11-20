@@ -4,7 +4,6 @@ namespace EvoMark\InertiaSymfonyBundle\EventListener;
 
 use EvoMark\InertiaSymfonyBundle\Support\Header;
 use EvoMark\InertiaSymfonyBundle\Support\RequestHelper;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
@@ -15,9 +14,11 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
  *
  * Runs after {@see RedirectStatusListener}.
  */
-#[AsEventListener(event: ResponseEvent::class, priority: -8)]
 final class FragmentRedirectListener
 {
+    /**
+     * Turn an Inertia redirect to a URL with a fragment into a 409 the client follows itself.
+     */
     public function __invoke(ResponseEvent $event): void
     {
         $request = $event->getRequest();

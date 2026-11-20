@@ -22,6 +22,9 @@ use Symfony\Component\HttpFoundation\Response;
  */
 final class InertiaController
 {
+    /**
+     * @param InertiaInterface $inertia renders the page
+     */
     public function __construct(private InertiaInterface $inertia)
     {
     }

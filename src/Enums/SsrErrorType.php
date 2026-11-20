@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace EvoMark\InertiaSymfonyBundle\Enums;
 
+/**
+ * The kind of failure the SSR server reported for a render.
+ */
 enum SsrErrorType: string
 {
     case BrowserApi = 'browser-api';

@@ -25,6 +25,11 @@ class ExceptionResponse
 
     protected ?string $rootView = null;
 
+    /**
+     * @param \Throwable       $exception the exception being handled
+     * @param Request          $request   the request that threw it
+     * @param InertiaInterface $inertia   renders the error page
+     */
     public function __construct(
         public readonly \Throwable $exception,
         public readonly Request $request,

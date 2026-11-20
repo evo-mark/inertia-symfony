@@ -15,10 +15,18 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(name: 'inertia:check-ssr', description: 'Check the Inertia SSR server health status')]
 final class CheckSsrCommand
 {
+    /**
+     * @param SsrGatewayInterface $gateway the gateway whose SSR server is checked
+     */
     public function __construct(private SsrGatewayInterface $gateway)
     {
     }
 
+    /**
+     * Report whether the SSR server answers its health check.
+     *
+     * @return int 0 when it is running, 1 otherwise
+     */
     public function __invoke(SymfonyStyle $io): int
     {
         if (!$this->gateway instanceof SsrHasHealthCheckInterface) {

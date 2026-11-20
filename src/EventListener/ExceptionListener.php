@@ -5,7 +5,6 @@ namespace EvoMark\InertiaSymfonyBundle\EventListener;
 use EvoMark\InertiaSymfonyBundle\Http\ExceptionResponse;
 use EvoMark\InertiaSymfonyBundle\Http\Response as InertiaResponse;
 use EvoMark\InertiaSymfonyBundle\Interfaces\InertiaInterface;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
@@ -18,13 +17,18 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
  * page is rendered (priority -128). The kernel.response listeners still run on
  * the response it sets, so redirects become 303s and so on as usual.
  */
-#[AsEventListener(event: ExceptionEvent::class, priority: -64)]
 final class ExceptionListener
 {
+    /**
+     * @param InertiaInterface $inertia holds the exception handler and renders error pages
+     */
     public function __construct(private InertiaInterface $inertia)
     {
     }
 
+    /**
+     * Pass the exception to the registered handler and use the response it returns, if any.
+     */
     public function __invoke(ExceptionEvent $event): void
     {
         $handler = $this->inertia->getExceptionHandler();

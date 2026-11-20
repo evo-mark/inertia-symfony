@@ -95,7 +95,7 @@ final class TestKernel extends Kernel
             'default_path' => __DIR__.'/templates',
         ]);
 
-        $container->extension('inertia_symfony', self::$inertiaConfig);
+        $container->extension('evo_mark_inertia_symfony', self::$inertiaConfig);
 
         $container->services()
             ->defaults()->autowire()->autoconfigure()

@@ -6,6 +6,9 @@ namespace EvoMark\InertiaSymfonyBundle\Support;
 
 use Closure;
 
+/**
+ * Small general-purpose helpers.
+ */
 class General
 {
     /**

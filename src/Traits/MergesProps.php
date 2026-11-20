@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace EvoMark\InertiaSymfonyBundle\Traits;
 
+/**
+ * Lets a prop be merged with the value the client already has.
+ */
 trait MergesProps
 {
     /**

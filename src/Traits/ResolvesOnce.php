@@ -4,6 +4,9 @@ namespace EvoMark\InertiaSymfonyBundle\Traits;
 
 use function Symfony\Component\Clock\now;
 
+/**
+ * Lets a prop be resolved once and remembered by the client.
+ */
 trait ResolvesOnce
 {
     protected bool $once = false;
@@ -30,16 +33,25 @@ trait ResolvesOnce
         return $this;
     }
 
+    /**
+     * Whether the prop is resolved once.
+     */
     public function shouldResolveOnce(): bool
     {
         return $this->once;
     }
 
+    /**
+     * Whether the prop is resolved again even though the client has it.
+     */
     public function shouldBeRefreshed(): bool
     {
         return $this->refresh;
     }
 
+    /**
+     * The key the client remembers the prop under, if not its name.
+     */
     public function getKey(): ?string
     {
         return $this->key;
@@ -69,6 +81,9 @@ trait ResolvesOnce
         return $this;
     }
 
+    /**
+     * Let the client remember the prop until the given time, or for a number of seconds.
+     */
     public function until(\DateTimeInterface|\DateInterval|int $delay): static
     {
         $this->ttl = $this->secondsUntil($delay);
@@ -88,6 +103,9 @@ trait ResolvesOnce
         return (now()->getTimestamp() + $this->ttl) * 1000;
     }
 
+    /**
+     * The number of seconds from now until the given time.
+     */
     private function secondsUntil(\DateTimeInterface|\DateInterval|int $delay): int
     {
         $now = now();

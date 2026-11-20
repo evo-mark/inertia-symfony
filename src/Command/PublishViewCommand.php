@@ -7,7 +7,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
 
@@ -20,13 +19,23 @@ final class PublishViewCommand
 {
     private const string STUB = __DIR__.'/../../stubs/app.html.twig.stub';
 
+    /**
+     * @param string        $projectDir the application's project directory
+     * @param Filesystem    $filesystem writes the template
+     * @param InertiaConfig $config     provides the root view name
+     */
     public function __construct(
-        #[Autowire('%kernel.project_dir%')] private string $projectDir,
+        private string $projectDir,
         private Filesystem $filesystem,
         private InertiaConfig $config,
     ) {
     }
 
+    /**
+     * Write the root template into templates/, named after the `root_view` config.
+     *
+     * @param bool $force overwrite an existing template
+     */
     public function __invoke(
         SymfonyStyle $io,
         #[Option('Overwrite the template if it already exists', shortcut: 'f')] bool $force = false,

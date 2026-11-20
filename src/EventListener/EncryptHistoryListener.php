@@ -4,7 +4,6 @@ namespace EvoMark\InertiaSymfonyBundle\EventListener;
 
 use EvoMark\InertiaSymfonyBundle\Attribute\EncryptHistory;
 use EvoMark\InertiaSymfonyBundle\Interfaces\InertiaInterface;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 
 /**
@@ -14,7 +13,6 @@ use Symfony\Component\HttpKernel\Event\ControllerEvent;
  * The route default wins over the attribute, since one controller can serve
  * several routes; an action's attribute wins over its class's.
  */
-#[AsEventListener(event: ControllerEvent::class)]
 final class EncryptHistoryListener
 {
     /**
@@ -22,10 +20,16 @@ final class EncryptHistoryListener
      */
     public const string ROUTE_DEFAULT = '_encrypt_history';
 
+    /**
+     * @param InertiaInterface $inertia receives the encryption setting for the request
+     */
     public function __construct(private InertiaInterface $inertia)
     {
     }
 
+    /**
+     * Apply the route default or #[EncryptHistory] attribute of the controller about to run.
+     */
     public function __invoke(ControllerEvent $event): void
     {
         if (!$event->isMainRequest()) {

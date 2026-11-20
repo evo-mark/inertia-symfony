@@ -6,6 +6,9 @@ namespace EvoMark\InertiaSymfonyBundle\Support;
 
 use ArrayAccess;
 
+/**
+ * Array helpers for reading and writing nested values with dot notation.
+ */
 class Arr
 {
     /**

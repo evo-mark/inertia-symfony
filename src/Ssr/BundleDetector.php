@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace EvoMark\InertiaSymfonyBundle\Ssr;
 
 use EvoMark\InertiaSymfonyBundle\Config\InertiaConfig;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 /**
  * Finds the built SSR bundle: the configured `ssr.bundle`, otherwise the first
@@ -24,9 +23,13 @@ class BundleDetector
         'var/ssr/app.mjs',
     ];
 
+    /**
+     * @param InertiaConfig $config     provides the configured bundle path
+     * @param string        $projectDir the directory the fallback paths are relative to
+     */
     public function __construct(
         private InertiaConfig $config,
-        #[Autowire('%kernel.project_dir%')] private string $projectDir,
+        private string $projectDir,
     ) {
     }
 

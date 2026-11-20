@@ -6,7 +6,6 @@ use EvoMark\InertiaSymfonyBundle\Config\InertiaConfig;
 use EvoMark\InertiaSymfonyBundle\Interfaces\InertiaInterface;
 use EvoMark\InertiaSymfonyBundle\Support\Header;
 use EvoMark\InertiaSymfonyBundle\Support\SessionKey;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 
@@ -18,15 +17,21 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
  * session attribute, shaped `array<bag, array<field, string|list<string>>>`.
  * Only the first message per field is sent.
  */
-#[AsEventListener(event: RequestEvent::class)]
 final class ValidationErrorsListener
 {
+    /**
+     * @param InertiaInterface $inertia receives the shared `errors` prop
+     * @param InertiaConfig    $config  decides whether every message per field is sent
+     */
     public function __construct(
         private InertiaInterface $inertia,
         private InertiaConfig $config,
     ) {
     }
 
+    /**
+     * Share the `errors` prop for the request.
+     */
     public function __invoke(RequestEvent $event): void
     {
         if (!$event->isMainRequest()) {

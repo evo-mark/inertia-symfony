@@ -12,8 +12,8 @@ response, which helps search engines and first paint.
 3. Turn it on:
 
 ```yaml
-# config/packages/inertia_symfony.yaml
-inertia_symfony:
+# config/packages/evo_mark_inertia_symfony.yaml
+evo_mark_inertia_symfony:
     ssr:
         enabled: true
         url: http://127.0.0.1:13714
@@ -62,7 +62,7 @@ Turn on `throw_on_error` (handy in development and CI) to throw an `SsrException
 after the event has been dispatched:
 
 ```yaml
-inertia_symfony:
+evo_mark_inertia_symfony:
     ssr:
         throw_on_error: true
 ```

@@ -14,6 +14,10 @@ use EvoMark\InertiaSymfonyBundle\Traits\MergesProps;
 use EvoMark\InertiaSymfonyBundle\Traits\ResolvesCallables;
 use EvoMark\InertiaSymfonyBundle\Traits\ResolvesOnce;
 
+/**
+ * A prop left out of the initial page load and loaded by the client afterwards,
+ * in its group of deferred props.
+ */
 class DeferProp implements DeferrableInterface, IgnoreFirstLoadInterface, MergeableInterface, OnceableInterface, RescuableInterface
 {
     use DefersProps;
@@ -24,6 +28,11 @@ class DeferProp implements DeferrableInterface, IgnoreFirstLoadInterface, Mergea
     protected mixed $callback;
     protected bool $rescue;
 
+    /**
+     * @param callable    $callback resolves the value
+     * @param string|null $group    the group it is loaded with (`default` if null)
+     * @param bool        $rescue   report errors while resolving it instead of throwing
+     */
     public function __construct(callable $callback, ?string $group = null, bool $rescue = false)
     {
         $this->callback = $callback;

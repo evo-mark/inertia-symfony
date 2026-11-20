@@ -6,8 +6,8 @@ namespace EvoMark\InertiaSymfonyBundle\Tests\Events;
 
 use EvoMark\InertiaSymfonyBundle\Enums\SsrErrorType;
 use EvoMark\InertiaSymfonyBundle\Events\SsrRenderFailed;
+use EvoMark\InertiaSymfonyBundle\Exception\SsrException;
 use EvoMark\InertiaSymfonyBundle\Ssr\HttpGateway;
-use EvoMark\InertiaSymfonyBundle\Ssr\SsrException;
 use EvoMark\InertiaSymfonyBundle\Tests\Fixtures\TestKernel;
 use EvoMark\InertiaSymfonyBundle\Tests\TestCase;
 use Symfony\Component\Filesystem\Filesystem;

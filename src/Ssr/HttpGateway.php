@@ -5,6 +5,7 @@ namespace EvoMark\InertiaSymfonyBundle\Ssr;
 use EvoMark\InertiaSymfonyBundle\Config\InertiaConfig;
 use EvoMark\InertiaSymfonyBundle\Enums\SsrErrorType;
 use EvoMark\InertiaSymfonyBundle\Events\SsrRenderFailed;
+use EvoMark\InertiaSymfonyBundle\Exception\SsrException;
 use EvoMark\InertiaSymfonyBundle\Interfaces\ConfiguresSsrRequestsInterface;
 use EvoMark\InertiaSymfonyBundle\Interfaces\DisablesSsrInterface;
 use EvoMark\InertiaSymfonyBundle\Interfaces\ExcludesSsrPathsInterface;
@@ -45,6 +46,14 @@ class HttpGateway implements SsrGatewayInterface, ExcludesSsrPathsInterface, Dis
      */
     private ?\Closure $requestConfigurator = null;
 
+    /**
+     * @param HttpClientInterface      $httpClient        sends the SSR requests
+     * @param InertiaConfig            $config            the SSR settings
+     * @param RequestStack             $requestStack      provides the request, for excluded paths
+     * @param EventDispatcherInterface $eventDispatcher   receives SsrRenderFailed events
+     * @param BundleDetector           $bundleDetector    checks the SSR bundle has been built
+     * @param DevServerDetector|null   $devServerDetector finds a running Vite dev server
+     */
     public function __construct(
         private HttpClientInterface $httpClient,
         private InertiaConfig $config,
@@ -55,6 +64,13 @@ class HttpGateway implements SsrGatewayInterface, ExcludesSsrPathsInterface, Dis
     ) {
     }
 
+    /**
+     * Render the page on the SSR server, or return null to render it client-side.
+     *
+     * @param array<string, mixed> $page the page object
+     *
+     * @throws SsrException when rendering fails and `ssr.throw_on_error` is on
+     */
     public function dispatch(array $page): ?Response
     {
         if (!$this->ssrIsEnabled() || $this->isExcluded($this->requestStack->getCurrentRequest())) {
@@ -147,6 +163,9 @@ class HttpGateway implements SsrGatewayInterface, ExcludesSsrPathsInterface, Dis
         $this->requestConfigurator = $callback;
     }
 
+    /**
+     * Forget the disable() condition between requests.
+     */
     public function reset(): void
     {
         $this->disabled = null;
@@ -198,6 +217,9 @@ class HttpGateway implements SsrGatewayInterface, ExcludesSsrPathsInterface, Dis
         return null !== $this->bundleDetector->detect();
     }
 
+    /**
+     * Whether SSR is on: the disable() condition if set, otherwise the config.
+     */
     protected function ssrIsEnabled(): bool
     {
         if (null !== $this->disabled) {
@@ -207,6 +229,9 @@ class HttpGateway implements SsrGatewayInterface, ExcludesSsrPathsInterface, Dis
         return $this->config->isSsr();
     }
 
+    /**
+     * Whether the request's path or URL matches an excluded path.
+     */
     protected function isExcluded(?Request $request): bool
     {
         if (null === $request || [] === $this->excludedPaths) {

@@ -23,6 +23,11 @@ use Symfony\Component\Process\Process;
 #[AsCommand(name: 'inertia:start-ssr', description: 'Start the Inertia SSR server')]
 final class StartSsrCommand
 {
+    /**
+     * @param InertiaConfig        $config         the SSR settings
+     * @param BundleDetector       $bundleDetector finds the built SSR bundle
+     * @param LoggerInterface|null $logger         receives the server's error output
+     */
     public function __construct(
         private InertiaConfig $config,
         private BundleDetector $bundleDetector,
@@ -30,6 +35,13 @@ final class StartSsrCommand
     ) {
     }
 
+    /**
+     * Run the SSR bundle with the runtime and stream its output until it exits.
+     *
+     * @param Application|null $application       runs inertia:stop-ssr first
+     * @param string|null      $runtime           the runtime, instead of `ssr.runtime`
+     * @param bool             $noStopBeforeStart skip stopping an already running server
+     */
     public function __invoke(
         SymfonyStyle $io,
         ?Application $application,
@@ -37,7 +49,7 @@ final class StartSsrCommand
         #[Option('Do not send a shutdown request to the configured SSR URL before starting')] bool $noStopBeforeStart = false,
     ): int {
         if (!$this->config->isSsr()) {
-            $io->error('Inertia SSR is not enabled. Enable it via the `inertia_symfony.ssr.enabled` config option.');
+            $io->error('Inertia SSR is not enabled. Enable it via the `evo_mark_inertia_symfony.ssr.enabled` config option.');
 
             return Command::FAILURE;
         }
@@ -48,7 +60,7 @@ final class StartSsrCommand
         if (null === $bundle) {
             $io->error(null !== $configuredBundle && '' !== $configuredBundle
                 ? \sprintf('Inertia SSR bundle not found at the configured path: "%s"', $configuredBundle)
-                : 'Inertia SSR bundle not found. Set the correct Inertia SSR bundle path in your `inertia_symfony.ssr.bundle` config.');
+                : 'Inertia SSR bundle not found. Set the correct Inertia SSR bundle path in your `evo_mark_inertia_symfony.ssr.bundle` config.');
 
             return Command::FAILURE;
         }

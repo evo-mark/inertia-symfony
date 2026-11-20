@@ -51,7 +51,7 @@ abstract class TestCase extends KernelTestCase
     }
 
     /**
-     * Merge bundle configuration into the test kernel's `inertia_symfony` config.
+     * Merge bundle configuration into the test kernel's `evo_mark_inertia_symfony` config.
      * Must be called before the kernel boots (i.e. before the first inertia()/request).
      *
      * @param array<string, mixed> $config

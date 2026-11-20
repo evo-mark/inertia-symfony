@@ -7,5 +7,8 @@ namespace EvoMark\InertiaSymfonyBundle\Interfaces;
  */
 interface RescuableInterface
 {
+    /**
+     * Whether errors while resolving the prop are reported instead of thrown.
+     */
     public function shouldRescue(): bool;
 }

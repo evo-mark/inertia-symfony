@@ -4,7 +4,6 @@ namespace EvoMark\InertiaSymfonyBundle\EventListener;
 
 use EvoMark\InertiaSymfonyBundle\Interfaces\InertiaInterface;
 use EvoMark\InertiaSymfonyBundle\Support\Header;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 /**
@@ -14,13 +13,18 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
  * Runs before {@see RedirectStatusListener}, so the redirect still becomes a
  * 303 after PUT, PATCH, DELETE or QUERY.
  */
-#[AsEventListener(event: ResponseEvent::class, priority: 8)]
 final class EmptyResponseListener
 {
+    /**
+     * @param InertiaInterface $inertia builds the redirect back
+     */
     public function __construct(private InertiaInterface $inertia)
     {
     }
 
+    /**
+     * Replace an empty 200 answer to an Inertia request with a redirect back.
+     */
     public function __invoke(ResponseEvent $event): void
     {
         $response = $event->getResponse();

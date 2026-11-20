@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace EvoMark\InertiaSymfonyBundle\Tests\Services;
 
-use EvoMark\InertiaSymfonyBundle\Exceptions\ComponentNotFoundException;
+use EvoMark\InertiaSymfonyBundle\Exception\ComponentNotFoundException;
 use EvoMark\InertiaSymfonyBundle\Http\Response as InertiaResponse;
 use EvoMark\InertiaSymfonyBundle\Interfaces\SsrGatewayInterface;
 use EvoMark\InertiaSymfonyBundle\PageProps\AlwaysProp;

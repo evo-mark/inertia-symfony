@@ -4,7 +4,6 @@ namespace EvoMark\InertiaSymfonyBundle\EventListener;
 
 use EvoMark\InertiaSymfonyBundle\Interfaces\InertiaInterface;
 use EvoMark\InertiaSymfonyBundle\Support\Header;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 
@@ -15,13 +14,18 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
  * This runs before the controller, which skips work whose result would be
  * thrown away and leaves flash data in the session for the reloaded page.
  */
-#[AsEventListener(event: RequestEvent::class)]
 class AssetVersionListener
 {
+    /**
+     * @param InertiaInterface $inertia provides the current asset version
+     */
     public function __construct(private InertiaInterface $inertia)
     {
     }
 
+    /**
+     * Answer a stale GET Inertia visit with a 409 for a full page reload.
+     */
     public function __invoke(RequestEvent $event): void
     {
         $request = $event->getRequest();

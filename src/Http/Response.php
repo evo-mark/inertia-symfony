@@ -197,6 +197,9 @@ class Response implements LoggerAwareInterface
         return $this;
     }
 
+    /**
+     * The page component this response renders.
+     */
     public function getComponent(): string
     {
         return $this->component;
@@ -218,11 +221,17 @@ class Response implements LoggerAwareInterface
         return $this->props;
     }
 
+    /**
+     * The Twig template the page is rendered into on a full page load.
+     */
     public function getRootView(): string
     {
         return $this->rootView;
     }
 
+    /**
+     * The asset version sent with the page.
+     */
     public function getVersion(): string
     {
         return $this->version;

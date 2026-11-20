@@ -6,7 +6,6 @@ use EvoMark\InertiaSymfonyBundle\Config\InertiaConfig;
 use EvoMark\InertiaSymfonyBundle\Support\Header;
 use EvoMark\InertiaSymfonyBundle\Support\RequestHelper;
 use EvoMark\InertiaSymfonyBundle\Support\SessionKey;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,13 +20,18 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
  *
  * Runs before Symfony's own session listener (priority -1000) saves the session.
  */
-#[AsEventListener(event: ResponseEvent::class)]
 final class SessionDataListener
 {
+    /**
+     * @param InertiaConfig $config decides whether previous URLs are stored
+     */
     public function __construct(private InertiaConfig $config)
     {
     }
 
+    /**
+     * Store an Inertia visit's URL and route as the previous location, when it should be.
+     */
     public function __invoke(ResponseEvent $event): void
     {
         $request = $event->getRequest();

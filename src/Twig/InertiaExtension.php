@@ -11,14 +11,24 @@ use Twig\Extension\AbstractExtension;
 use Twig\Markup;
 use Twig\TwigFunction;
 
+/**
+ * The inertiaHead() and inertiaApp() Twig functions for the root template.
+ */
 class InertiaExtension extends AbstractExtension
 {
+    /**
+     * @param InertiaConfig $config   decides whether SSR is on
+     * @param SsrState      $ssrState renders the page on the SSR server, once per request
+     */
     public function __construct(
         private InertiaConfig $config,
         private SsrState $ssrState,
     ) {
     }
 
+    /**
+     * @return list<TwigFunction>
+     */
     public function getFunctions(): array
     {
         return [

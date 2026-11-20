@@ -7,10 +7,19 @@ namespace EvoMark\InertiaSymfonyBundle\Interfaces;
  */
 interface MergeableInterface
 {
+    /**
+     * Merge the prop with the client's existing value.
+     */
     public function merge(): static;
 
+    /**
+     * Whether the prop is merged with the client's existing value.
+     */
     public function shouldMerge(): bool;
 
+    /**
+     * Whether the prop is deep merged.
+     */
     public function shouldDeepMerge(): bool;
 
     /**
@@ -18,8 +27,14 @@ interface MergeableInterface
      */
     public function matchesOn(): array;
 
+    /**
+     * Whether the prop is appended to the existing value as a whole.
+     */
     public function appendsAtRoot(): bool;
 
+    /**
+     * Whether the prop is prepended to the existing value as a whole.
+     */
     public function prependsAtRoot(): bool;
 
     /**

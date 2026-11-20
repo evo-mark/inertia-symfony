@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace EvoMark\InertiaSymfonyBundle\Services;
 
 use EvoMark\InertiaSymfonyBundle\Config\InertiaConfig;
-use EvoMark\InertiaSymfonyBundle\Exceptions\ComponentNotFoundException;
+use EvoMark\InertiaSymfonyBundle\Exception\ComponentNotFoundException;
 use EvoMark\InertiaSymfonyBundle\Http\ExceptionResponse;
 use EvoMark\InertiaSymfonyBundle\Http\Response as InertiaResponse;
 use EvoMark\InertiaSymfonyBundle\Interfaces\ConfiguresSsrRequestsInterface;
@@ -35,6 +35,10 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Contracts\Service\ResetInterface;
 use Twig\Environment;
 
+/**
+ * The Inertia service: renders pages, shares props, and holds the options for the
+ * current request. Per-request state is reset between requests (kernel.reset).
+ */
 class Inertia implements InertiaInterface, ResetInterface
 {
     protected string $rootView;
@@ -54,6 +58,15 @@ class Inertia implements InertiaInterface, ResetInterface
      */
     protected ?bool $encryptHistory;
 
+    /**
+     * @param InertiaConfig            $config       the bundle configuration
+     * @param Environment              $engine       renders the root template
+     * @param RequestStack             $requestStack provides the current request and session
+     * @param SerializerInterface|null $serializer   encodes pages, when installed
+     * @param LoggerInterface|null     $logger       reports errors from rescued props
+     * @param PageFinder|null          $pageFinder   checks page files exist
+     * @param SsrGatewayInterface|null $ssrGateway   receives the SSR settings
+     */
     public function __construct(
         private InertiaConfig $config,
         private Environment $engine,
@@ -82,16 +95,25 @@ class Inertia implements InertiaInterface, ResetInterface
         $this->encryptHistory = null;
     }
 
+    /**
+     * Use a different root Twig template for this request.
+     */
     public function setRootView(string $rootView): void
     {
         $this->rootView = $rootView;
     }
 
+    /**
+     * The root Twig template pages are rendered into.
+     */
     public function getRootView(): string
     {
         return $this->rootView;
     }
 
+    /**
+     * Set the asset version: a string, a closure returning one, or null for the default.
+     */
     public function version(string|\Closure|null $version): void
     {
         $this->version = $version;
@@ -124,20 +146,30 @@ class Inertia implements InertiaInterface, ResetInterface
         return null;
     }
 
+    /**
+     * Pass a variable to the root Twig template of every page in this request.
+     */
     public function viewData(string $key, mixed $value = null): void
     {
         $this->sharedViewData[$key] = $value;
     }
 
-    public function getViewData(?string $key = null): ?array
+    /**
+     * All root template variables, or the one under the given key.
+     */
+    public function getViewData(?string $key = null): mixed
     {
-        if ($key) {
+        if (null !== $key) {
             return $this->sharedViewData[$key] ?? null;
         }
 
         return $this->sharedViewData;
     }
 
+    /**
+     * Share props with every page: a key (dot notation nests) and value, an array of
+     * props, or a props provider.
+     */
     public function share(string|array|ProvidesInertiaPropertiesInterface $key, mixed $value = null): void
     {
         if (is_array($key)) {
@@ -540,10 +572,5 @@ class Inertia implements InertiaInterface, ResetInterface
         } catch (\InvalidArgumentException $e) {
             throw new ComponentNotFoundException("Inertia page component [{$component}] not found.", previous: $e);
         }
-    }
-
-    private static function array_only($array, $keys)
-    {
-        return array_intersect_key($array, array_flip((array) $keys));
     }
 }

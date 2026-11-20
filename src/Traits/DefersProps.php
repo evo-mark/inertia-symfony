@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace EvoMark\InertiaSymfonyBundle\Traits;
 
+/**
+ * Lets a prop be deferred: left out of the initial page load and loaded afterwards.
+ */
 trait DefersProps
 {
     /**

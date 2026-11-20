@@ -21,5 +21,5 @@ features:
   - title: Server-side rendering
     details: Render pages on a Node SSR server with automatic fallback, failure events and an opt-in exception.
   - title: Symfony native
-    details: Autowired services, attribute-registered listeners, session flash and validation errors, and a Twig root template.
+    details: Type-hint InertiaInterface anywhere, validate with #[MapRequestPayload], and use session flash data and a Twig root template.
 ---

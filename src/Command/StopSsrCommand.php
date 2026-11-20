@@ -18,10 +18,18 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(name: 'inertia:stop-ssr', description: 'Stop the Inertia SSR server')]
 final class StopSsrCommand
 {
+    /**
+     * @param HttpGateway $gateway provides the SSR server URL
+     */
     public function __construct(private HttpGateway $gateway)
     {
     }
 
+    /**
+     * Ask the SSR server to shut down.
+     *
+     * @param bool $graceful succeed when no server is running
+     */
     public function __invoke(
         SymfonyStyle $io,
         #[Option('Return a successful exit code when the SSR server is not running')] bool $graceful = false,

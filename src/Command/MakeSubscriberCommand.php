@@ -7,7 +7,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Attribute\Option;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
 
@@ -22,12 +21,22 @@ final class MakeSubscriberCommand
 
     private const string STUB = __DIR__.'/../../stubs/InertiaSubscriber.php.stub';
 
+    /**
+     * @param string     $projectDir the application's project directory
+     * @param Filesystem $filesystem writes the generated class
+     */
     public function __construct(
-        #[Autowire('%kernel.project_dir%')] private string $projectDir,
+        private string $projectDir,
         private Filesystem $filesystem,
     ) {
     }
 
+    /**
+     * Write the listener class into src/EventSubscriber/.
+     *
+     * @param string $name  the class name to generate
+     * @param bool   $force overwrite an existing class
+     */
     public function __invoke(
         SymfonyStyle $io,
         #[Argument('The class name to generate')] string $name = 'InertiaSubscriber',

@@ -1,14 +1,14 @@
 # Configuration
 
-All settings live under `inertia_symfony` and are optional. List them with:
+All settings live under `evo_mark_inertia_symfony` and are optional. List them with:
 
 ```sh
-bin/console config:dump-reference inertia_symfony
+bin/console config:dump-reference evo_mark_inertia_symfony
 ```
 
 ```yaml
-# config/packages/inertia_symfony.yaml
-inertia_symfony:
+# config/packages/evo_mark_inertia_symfony.yaml
+evo_mark_inertia_symfony:
     root_view: app.html.twig
     ssr:
         enabled: false

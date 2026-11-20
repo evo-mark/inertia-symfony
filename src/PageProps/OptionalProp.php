@@ -9,6 +9,9 @@ use EvoMark\InertiaSymfonyBundle\Interfaces\OnceableInterface;
 use EvoMark\InertiaSymfonyBundle\Traits\ResolvesCallables;
 use EvoMark\InertiaSymfonyBundle\Traits\ResolvesOnce;
 
+/**
+ * A prop only sent when a partial reload asks for it.
+ */
 class OptionalProp implements IgnoreFirstLoadInterface, OnceableInterface
 {
     use ResolvesCallables;
@@ -26,6 +29,9 @@ class OptionalProp implements IgnoreFirstLoadInterface, OnceableInterface
         $this->callback = $callback;
     }
 
+    /**
+     * Resolve the prop's value.
+     */
     public function __invoke(): mixed
     {
         return $this->resolveCallable($this->callback);

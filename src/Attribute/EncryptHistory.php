@@ -16,6 +16,9 @@ namespace EvoMark\InertiaSymfonyBundle\Attribute;
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD | \Attribute::TARGET_FUNCTION)]
 final readonly class EncryptHistory
 {
+    /**
+     * @param bool $encrypt whether to encrypt the history (false opts out)
+     */
     public function __construct(public bool $encrypt = true)
     {
     }
